@@ -33,14 +33,14 @@ public:
 	virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data)
 	{
 		// LAYOUT ENABLE/DISABLE FROM TOP MENU BAR
-		if (code == ToWord('L', 'D') )
+		if ((code == ToWord('L', 'D') )||(code == ToWord('S', 'H') && data == 0))
 		{
 			bTimer = false;
 			KillTimer();
 			return;
 		}
 
-		if (code == ToWord('L', 'E') )
+		if ((code == ToWord('L', 'E') )||(code == ToWord('S', 'H') && data == 1 ))
 		{
 			bRefresh = true;
 			return;
