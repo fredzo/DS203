@@ -5,6 +5,10 @@
 
 void CWndDmm::OnPaint()
 {
+	if ( CWnd::m_rcOverlay.IsValid() )
+	{
+		return;
+	}
 	char strDisplay[16];
 	CSettings::Calibrator::FastCalc fastCalc;
 	Settings.CH1Calib.Prepare( &Settings.CH1, fastCalc );
