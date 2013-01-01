@@ -36,6 +36,12 @@ public:
 
 	virtual void OnPaint();
 
+	virtual void OnTimer()
+	{
+		bTimer = false;
+		KillTimer();
+	}
+
 	virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data)
 	{
 		// LAYOUT ENABLE/DISABLE FROM TOP MENU BAR
@@ -54,11 +60,19 @@ public:
 
 		if ( pSender == NULL && code == WmBroadcast && data == ToWord('d', 'g') )
 		{
+			// TODO make refresh rate configurable
+			// No more than one refresh each 500 ms
+			if (bTimer)
+			{
+				return;
+			}
+			KillTimer();
+			SetTimer(500);
+			bTimer = true;
 			Invalidate();
 			return;
 		}
 	}
-
 };
 
 #endif
