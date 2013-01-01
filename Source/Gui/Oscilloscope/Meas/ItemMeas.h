@@ -17,7 +17,7 @@ public:
 		CWndMenuItem::SetColorPtr( &m_color );
 	}
 
-	virtual void OnPaint()
+	void OnPaint(bool updateBg)
 	{
 		bool bEnabled = m_pMeas->Enabled == CSettings::Measure::_On;
 		ui16 clr = bEnabled ? RGB565(000000) : RGB565(808080);
@@ -30,11 +30,18 @@ public:
 		case CSettings::Measure::_Math: m_color = Settings.Math.uiColor; break;
 		}
 		
-		CWndMenuItem::OnPaint();
-
 		int x = m_rcClient.left + 10 + MarginLeft;
 		int y = m_rcClient.top;
-		BIOS::LCD::Print( x, y, clr, RGBTRANS, CSettings::Measure::ppszTextType[ (int)m_pMeas->Type ] );
+
+		if(updateBg)
+		{
+			CWndMenuItem::OnPaint();
+			BIOS::LCD::Print( x, y, clr, RGBTRANS, CSettings::Measure::ppszTextType[ (int)m_pMeas->Type ] );
+		}
+		else
+		{
+			CWndMenuItem::ClearValueBottomBg();
+		}
 
 		if ( bEnabled )
 		{
@@ -59,6 +66,11 @@ public:
 			if ( suffix && *suffix )
 				BIOS::LCD::Print( x, y, clr2, RGBTRANS, suffix );
 		}
+	}
+
+	virtual void OnPaint()
+	{
+		OnPaint(true);
 	}
 
 	virtual void OnKey(ui16 nKey)

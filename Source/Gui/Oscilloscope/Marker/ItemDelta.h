@@ -22,19 +22,27 @@ public:
 			CWndMenuItem::Create( NULL, RGB565(8080b0), 3, pParent);
 	}
 
-	virtual void OnPaint()
+	void OnPaint(bool updateBg)
 	{
 		bool bDisabled = ( m_pMarker1->Mode == CSettings::Marker::_Off ) ||
 			( m_pMarker2->Mode == CSettings::Marker::_Off );
 
 		ui16 clr = bDisabled ? RGB565(808080) : RGB565(000000);
 
-		CWndMenuItem::OnPaint();
 		int x = m_rcClient.left + 12 + MarginLeft;
 		int y = m_rcClient.top;
 		int _x = x;
 		x += 8;
-		x += BIOS::LCD::Print( x, y, clr, RGBTRANS, m_strId );
+		if(updateBg)
+		{
+			CWndMenuItem::OnPaint();
+			x += BIOS::LCD::Print( x, y, clr, RGBTRANS, m_strId );
+		}
+		else
+		{
+			CWndMenuItem::ClearValueBottomBg();
+		}
+
 		if ( bDisabled )
 			return;
 
@@ -98,6 +106,11 @@ public:
 
 		
 
+	}
+
+	virtual void OnPaint()
+	{
+		OnPaint(true);
 	}
 };
 

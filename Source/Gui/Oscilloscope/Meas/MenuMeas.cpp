@@ -130,7 +130,7 @@ void CWndMenuMeas::_UpdateAll()
 					_ASSERT( !!!"Unknown measurement type" );
 			}
 			if ( fPrev != meas.fValue )
-				m_itmMeas[i].Invalidate();
+				m_itmMeas[i].OnPaint(false);
 		}
 	}
 }

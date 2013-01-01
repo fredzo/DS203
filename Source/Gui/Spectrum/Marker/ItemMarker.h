@@ -12,10 +12,22 @@ public:
 
 	virtual void OnPaint()
 	{
+		OnPaint(true);
+	}
+
+	void OnPaint(bool updateBg)
+	{
 		bool bEnabled = Settings.Spec.MarkerSource != CSettings::Spectrum::_Off;
 		ui16 clr = bEnabled ? RGB565(000000) : RGB565(808080);
 	
-		CWndMenuItem::OnPaint();
+		if(updateBg)
+		{
+			CWndMenuItem::OnPaint();
+		}
+		else
+		{
+			CWndMenuItem::ClearValueBg();
+		}
 		
 		int x = m_rcClient.left + 10 + MarginLeft;
 		int y = m_rcClient.top;

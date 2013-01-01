@@ -64,13 +64,13 @@ CWndMenuCursor::CWndMenuCursor()
 	if ( pSender == NULL && code == WmBroadcast && data == ToWord('d', 'g') )
 	{
 		if ( Settings.MarkY1.Mode == CSettings::Marker::_Auto )
-			m_itmY1.Invalidate();
+			m_itmY1.OnPaint(false);
 		if ( Settings.MarkY2.Mode == CSettings::Marker::_Auto )
-			m_itmY2.Invalidate();
+			m_itmY2.OnPaint(false);
 		if ( Settings.MarkY1.Mode == CSettings::Marker::_Auto ||
 			 Settings.MarkY1.Mode == CSettings::Marker::_Auto )
 		{
-			m_itmDeltaY.Invalidate();
+			m_itmDeltaY.OnPaint(false);
 		}
 		return;
 	}

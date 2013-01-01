@@ -15,14 +15,22 @@ public:
 		CWndMenuItem::Create( NULL, pMarker->u16Color, 1, pParent);
 	}
 
-	virtual void OnPaint()
+	void OnPaint(bool updateBg)
 	{
 		ui16 clr = ( m_pMarker->Mode != 
 			CSettings::Marker::_Off ) ? RGB565(000000) : RGB565(808080);
 		ui16 clr2 = ( m_pMarker->Mode != 
 			CSettings::Marker::_Off ) ? RGB565(404040) : RGB565(909090);
+		
+		if(updateBg)
+		{
+			CWndMenuItem::OnPaint();
+		}
+		else
+		{
+			CWndMenuItem::ClearValueTopBg();
+		}
 
-		CWndMenuItem::OnPaint();
 		int x = m_rcClient.left + 12 + MarginLeft;
 		int y = m_rcClient.top;
 
@@ -84,6 +92,11 @@ public:
 				}
 			}
 		}
+	}
+
+	virtual void OnPaint()
+	{
+		OnPaint(true);
 	}
 
 	virtual void OnKey(ui16 nKey)

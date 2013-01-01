@@ -18,7 +18,7 @@ CWndMenuSpectMarker::CWndMenuSpectMarker()
 {
 	if ( pSender == NULL && code == WmBroadcast && data == ToWord('d', 'g') )
 	{
-		m_itmValue.Invalidate();
+		m_itmValue.OnPaint(false);
 	}
 
 	// LAYOUT ENABLE/DISABLE FROM TOP MENU BAR
