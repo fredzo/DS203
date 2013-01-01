@@ -4,137 +4,6 @@
 #include <Source/Core/Utils.h>
 #include <math.h>
 
-void CWndDmm::OnPaint()
-{
-	if ( CWnd::m_rcOverlay.IsValid() )
-	{	// Do not redraw screen if modal window is active, but prepare for a refresh when it's closed
-		bRefresh = true;
-		return;
-	}
-	//CSettings::Calibrator::FastCalc fastCalc;
-	//Settings.CH1Calib.Prepare( &Settings.CH1, fastCalc );
-
-	//float fCorrect = Settings.CH1Calib.Correct( fastCalc, m_fAverage );
-	//float fDisplay = Settings.CH1Calib.Voltage( fastCalc, m_fAverage );
-
-	bool isErr = false; //(m_fAverage < 16 || m_fAverage > 240);
-	// Draw big printf
-	//CUtils::Printf( 80, 80, CWndDmm::cOn, CWndDmm::cClr, 2, "%3f mV", fDisplay);
-	//BIOS::LCD::Printf( 80, 80, CWndDmm::cOn, CWndDmm::cClr, "%3f mV", fDisplay);
-	float fValue;
-	// Draw values
-	for(int i = 0 ; i < valuesNumber ; i++)
-	{
-		fValue = Settings.DmmMeas[i].fValue;
-		DisplayValue(fValue,isErr,i,Settings.DmmMeas[i].Type,bRefresh);
-	}
-
-	
-
-	
-	if ( bRefresh )
-	{
-		//BIOS::LCD::Bar( m_rcClient, CWndDmm::cClr );
-		bRefresh = false;
-	}
-
-	// Draw bottom line
-	//BIOS::LCD::Printf( 8, 220, RGB565(808080), RGB565(ffffff), "adc=%3f cal=%3f var=%3f range=%s ", m_fAverage, fCorrect, m_fVariance, CSettings::AnalogChannel::ppszTextResolution[Settings.CH1.Resolution]);
-
-}
-
-void CWndDmm::DisplayValue(float value, bool isErr, int position, int unit, bool redraw)
-{
-	char newDisplay[10];
-	bool negative = value < 0;
-	value = abs(value);
-	if (isErr)
-	{
-		newDisplay[0]=' ';
-		newDisplay[1]=' ';
-		newDisplay[2]='E';
-		newDisplay[3]='r';
-		newDisplay[4]='r';
-	}
-	else
-	{
-		BIOS::DBG::sprintf( newDisplay, " %04f", value );
-		newDisplay[0] = negative ? '-' : ' ';
-	}
-
-	// Setup disaplay according to position
-	int width;
-	int size;
-	int space;
-	int x;
-	int y;
-	int scale;
-	switch(position)
-	{
-	case 0:
-		// Main
-		width = 8;
-		size = 30;
-		space = 1;
-		x=20;
-		y=120;
-		scale = 2;
-		break;
-	case 1:
-		// Value1
-		width = 4;
-		size = 10;
-		space = 1;
-		x=20;
-		y=30;
-		scale = 1;
-		break;
-	case 2:
-		// Value2
-		width = 4;
-		size = 10;
-		space = 1;
-		x=160;
-		y=30;
-		scale = 1;
-		break;
-	default:
-		_ASSERT( !!!"Invalid position" );
-	}
-	int i;
-	const char* pDisplay = newDisplay;
-	for (i=0; i < 5; i++)
-	{
-		int nDigit = *pDisplay;
-		if(nDigit == 0) 
-		{  // End of string
-			nDigit = ' ';
-		}
-		else 
-		{
-			if ( pDisplay[1] == '.' )
-			{
-				nDigit |= 128;
-				pDisplay++;
-			}
-			pDisplay++;
-		}
-		if(redraw || nDigit != values[position][i])
-		{
-	 		DrawDigit(x, y, width, size, space, nDigit, CWndDmm::cOn, CWndDmm::cOff);
-			values[position][i] = nDigit;
-		}
-		x+=(size+2*width+7*space);
-	}
-	// Unit
-	if(redraw || unit != values[position][5])
-	{
-		CUtils::Printf( x, y, CWndDmm::cOn, CWndDmm::cClr, scale, CSettings::DmmMeasure::ppszTextSuffix[unit]);
-		values[position][5] = unit;
-	}
-
-}
-
 void DrawTriangle(int x, int y, int size, bool half, ui8 quadrant, ui16 clr)
 {
 	if(half)
@@ -221,10 +90,13 @@ void DrawTriangle(int x, int y, int size, bool half, ui8 quadrant, ui16 clr)
 	}
 }
 
+void _DrawMinus(int x, int y, int width, int size, ui16 clr)
+{
+	BIOS::LCD::Bar( x, y, x+size, y+width, clr ); 
+}
+
 void _DrawDigitHT(int x, int y, int width, int size, ui16 clr)
 {
-	if ( clr == RGB565(ff00ff) )
-		return;
 	DrawTriangle(x,y,width,true,0,clr);
 	BIOS::LCD::Bar( x+width, y, x+size, y+width, clr ); 
 	DrawTriangle(x+size,y,width,true,3,clr);
@@ -232,8 +104,6 @@ void _DrawDigitHT(int x, int y, int width, int size, ui16 clr)
 
 void _DrawDigitHC(int x, int y, int width, int size, ui16 clr)
 {
-	if ( clr == RGB565(ff00ff) )
-		return;
 	DrawTriangle(x,y,width,false,1,clr);
 	BIOS::LCD::Bar( x+width/2, y, x+size+width/2, y+width, clr ); 
 	DrawTriangle(x+size+width/2,y,width,false,3,clr);
@@ -241,8 +111,6 @@ void _DrawDigitHC(int x, int y, int width, int size, ui16 clr)
 
 void _DrawDigitHB(int x, int y, int width, int size, ui16 clr)
 {
-	if ( clr == RGB565(ff00ff) )
-		return;
 	DrawTriangle(x,y,width,true,1,clr);
 	BIOS::LCD::Bar( x+width, y, x+size, y+width, clr ); 
 	DrawTriangle(x+size,y,width,true,2,clr);
@@ -250,8 +118,6 @@ void _DrawDigitHB(int x, int y, int width, int size, ui16 clr)
 
 void _DrawDigitVL(int x, int y, int width, int size, ui16 clr)
 {
-	if ( clr == RGB565(ff00ff) )
-		return;
 	DrawTriangle(x,y,width,true,2,clr);
 	BIOS::LCD::Bar( x, y+width, x+width, y+size, clr ); 
 	DrawTriangle(x,y+size,width,true,3,clr);
@@ -259,8 +125,6 @@ void _DrawDigitVL(int x, int y, int width, int size, ui16 clr)
 
 void _DrawDigitVR(int x, int y, int width, int size, ui16 clr)
 {
-	if ( clr == RGB565(ff00ff) )
-		return;
 	DrawTriangle(x,y,width,true,1,clr);
 	BIOS::LCD::Bar( x, y+width, x+width, y+size, clr ); 
 	DrawTriangle(x,y+size,width,true,0,clr);
@@ -268,9 +132,152 @@ void _DrawDigitVR(int x, int y, int width, int size, ui16 clr)
 
 void _DrawDot0(int x, int y, int width, int size, int space, ui16 clr)
 {
-	if ( clr == RGB565(ff00ff) )
-		return;
 	BIOS::LCD::Bar( x, y, x+(width/4)*3, y+(width/4)*3, clr );
+}
+
+void CWndDmm::OnPaint()
+{
+	if ( CWnd::m_rcOverlay.IsValid() )
+	{	// Do not redraw screen if modal window is active, but prepare for a refresh when it's closed
+		bRefresh = true;
+		return;
+	}
+
+	bool isErr = false; //(m_fAverage < 16 || m_fAverage > 240);
+	float fValue;
+	// Draw values
+	for(int i = 0 ; i < valuesNumber ; i++)
+	{
+		fValue = Settings.DmmMeas[i].fValue;
+		DisplayValue(fValue,isErr,i,Settings.DmmMeas[i].Type,bRefresh);
+	}
+	
+	if ( bRefresh )
+	{
+		bRefresh = false;
+	}
+
+	// Draw bottom line
+	//BIOS::LCD::Printf( 8, 220, RGB565(808080), RGB565(ffffff), "adc=%3f cal=%3f var=%3f range=%s ", m_fAverage, fCorrect, m_fVariance, CSettings::AnalogChannel::ppszTextResolution[Settings.CH1.Resolution]);
+
+}
+
+void CWndDmm::DisplayValue(float value, bool isErr, int position, int type, bool redraw)
+{
+	char newDisplay[12];
+	bool negative = value < 0;
+	value = abs(value);
+	if (isErr)
+	{
+		newDisplay[0]=' ';
+		newDisplay[1]=' ';
+		newDisplay[2]='E';
+		newDisplay[3]='r';
+		newDisplay[4]='r';
+	}
+	else
+	{
+		BIOS::DBG::sprintf( newDisplay, " %04f", value );
+		newDisplay[0] = negative ? '-' : ' ';
+	}
+
+	// Setup disaplay according to position
+	int width=8;
+	int size=30;
+	int space=1;
+	int x=36;
+	int y=70;
+	int scale=2;
+	switch(position)
+	{
+	case 0:
+		// Main => keep init values
+		break;
+	case 1:
+		// Value1
+		width = 4;
+		size = 10;
+		space = 1;
+		x=51;
+		y=18;
+		scale = 1;
+		break;
+	case 2:
+		// Value2
+		width = 4;
+		size = 10;
+		space = 1;
+		x=186;
+		y=18;
+		scale = 1;
+		break;
+	default:
+		_ASSERT( !!!"Invalid position" );
+	}
+	// Label
+	if(redraw || type != values[position][5])
+	{
+		CUtils::Printf( x+((size/2+width)+4*space), y, CWndDmm::cLabel, CWndDmm::cOff, scale, CSettings::DmmMeasure::ppszTextType[type]);
+	}
+	y+=14*scale+2*space;
+	// Value
+	int i;
+	const char* pDisplay = newDisplay;
+	for (i=0; i < 5; i++)
+	{
+		int nDigit = *pDisplay;
+		if(nDigit == 0) 
+		{  // End of string
+			nDigit = ' ';
+		}
+		else 
+		{
+			if ((i < 4) && (pDisplay[1] == '.'))
+			{
+				nDigit |= 128;
+				pDisplay++;
+			}
+			pDisplay++;
+		}
+		if(redraw || nDigit != values[position][i])
+		{
+			if(i == 0)
+			{	// Minus sign
+				if(nDigit ==  '-')
+				{
+					_DrawMinus( x, y+width/2+size+2*space-1, width, size/2+width, CWndDmm::cOn );
+				}
+				else
+				{
+					_DrawMinus( x, y+width/2+size+2*space-1, width, size/2+width, CWndDmm::cOff );
+				}
+			}
+			else
+			{	// Other digits
+		 		DrawDigit(x, y, width, size, space, nDigit, CWndDmm::cOn, CWndDmm::cOff);
+			}
+			values[position][i] = nDigit;
+		}
+		if(i == 0)
+		{
+			x+=((size/2+width)+3*space+scale*space);
+		}
+		else if(i == 4)
+		{
+			x+=(size+width+4*space+scale*space);
+		}
+		else
+		{
+			x+=(size+2*width+7*space);
+		}
+	}
+	// Unit
+	if(redraw || type != values[position][5])
+	{
+		CUtils::Printf( x, y, CWndDmm::cOn, CWndDmm::cClr, scale, CSettings::DmmMeasure::ppszTextSuffix[type]);
+		values[position][5] = type;
+	}
+
 }
 
 void CWndDmm::DrawDigit(int x, int y, int width, int size, int space, int nDigit, ui16 clrOn, ui16 clrOff)
@@ -283,7 +290,8 @@ void CWndDmm::DrawDigit(int x, int y, int width, int size, int space, int nDigit
 		dec = decoder[nDigit&15];
 		if ( nDigit & 128 )
 			dec |= 0x10000000;
-	} else
+	} 
+	else
 	{
 		switch (nDigit)
 		{
@@ -295,20 +303,10 @@ void CWndDmm::DrawDigit(int x, int y, int width, int size, int space, int nDigit
 		}
 	}
 
-	#define EN(n) ( dec>>(28-n*4)&1 ) ? RGB565(ff00ff) : clrOff
- 	_DrawDigitHT( x+space, y, width, size, EN(1) ); // horny
-	_DrawDigitHC( x+space, y+width/2+size+2*space-1, width, size, EN(7) ); // stredny
-	_DrawDigitHB( x+space, y+size*2+width+4*space, width, size, EN(4) ); // dolny
-	_DrawDigitVR( x+size+2*space, y+space, width, size, EN(2) );
-	_DrawDigitVR( x+size+2*space, y+size+width+3*space, width, size, EN(3) );
-	_DrawDigitVL( x, y+space, width, size, EN(6) ); 
-	_DrawDigitVL( x, y+size+width+3*space, width, size, EN(5) ); 
-	_DrawDot0(x+size+width+5*space, y+size*2+width+6*space, width, size, space, EN(0));
-	#undef EN
-	#define EN(n) ( dec>>(28-n*4)&1 ) ? clrOn : RGB565(ff00ff)
- 	_DrawDigitHT( x+space, y, width, size, EN(1) ); // horny
-	_DrawDigitHC( x+space, y+width/2+size+2*space-1, width, size, EN(7) ); // stredny
-	_DrawDigitHB( x+space, y+size*2+width+4*space, width, size, EN(4) ); // dolny
+	#define EN(n) ( dec>>(28-n*4)&1 ) ? clrOn : clrOff
+ 	_DrawDigitHT( x+space, y, width, size, EN(1) );
+	_DrawDigitHC( x+space, y+width/2+size+2*space-1, width, size, EN(7) );
+	_DrawDigitHB( x+space, y+size*2+width+4*space, width, size, EN(4) );
 	_DrawDigitVR( x+size+2*space, y+space, width, size, EN(2) );
 	_DrawDigitVR( x+size+2*space, y+size+width+3*space, width, size, EN(3) );
 	_DrawDigitVL( x, y+space, width, size, EN(6) ); 
@@ -316,46 +314,3 @@ void CWndDmm::DrawDigit(int x, int y, int width, int size, int space, int nDigit
 	_DrawDot0(x+size+width+5*space, y+size*2+width+6*space, width, size, space, EN(0));
 	#undef EN
 }
-
-//void CWndDmm::OnWave()
-//{
-//	if (bTimer)
-//		return;
-///*
-//#ifdef _WIN32
-//	m_fAverage = (float)167.27f;
-//	m_fVariance = 0.312f;	
-//	KillTimer();
-//	SetTimer(100);
-//	bTimer = true;
-//	return;
-//#endif
-//*/
-//	int nSum = 0;
-//	int nMax = -1, nMin = -1;
-//	for (int i=0; i</*BIOS::ADC::Length()*/ (int)BIOS::ADC::GetCount(); i++)
-//	{
-//		int nValue = BIOS::ADC::GetAt(i)&0xff;
-//		if ( nMax == -1 )
-//			nMax = nMin = nValue;
-//		else
-//		{
-//			nMax = max(nMax, nValue);
-//			nMin = min(nMin, nValue);
-//		}
-//		nSum += nValue;
-//	}
-//
-//	m_fAverage = (float)nSum/4096.0f;
-//	m_fVariance = (nMax-nMin)/4.0f;	// pseudo variance :)
-//	KillTimer();
-//	SetTimer(100);
-//	bTimer = true;
-//}
-//
-///*virtual*/ void CWndDmm::OnTimer()
-//{
-//	bTimer = false;
-//	KillTimer();
-//	Invalidate();
-//}

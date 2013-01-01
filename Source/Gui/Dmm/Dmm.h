@@ -8,6 +8,7 @@
 class CWndDmm : public CWnd
 {
 public:
+	static const ui16 cLabel = RGB565(bbbbbb);
 	static const ui16 cOn = RGB565(11bbff);
 	static const ui16 cOff = RGB565(050505);
 	static const ui16 cClr = RGB565(000000);
@@ -30,12 +31,10 @@ public:
 		CWnd::Create("CWndUserDmm", dwFlags | CWnd::WsListener | CWnd::WsNoActivate, CRect(0, 16, 320-CWndMenuItem::MarginLeft, 240), pParent);
 	}
 
-	void DisplayValue(float value, bool isErr, int position, int unit, bool redraw);
+	void DisplayValue(float value, bool isErr, int position, int type, bool redraw);
 	void DrawDigit(int x, int y, int width, int size, int space, int n, ui16 clrOn, ui16 clrOff );
-	//void OnWave();
 
 	virtual void OnPaint();
-	//virtual void OnTimer();
 
 	virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data)
 	{
@@ -55,7 +54,6 @@ public:
 
 		if ( pSender == NULL && code == WmBroadcast && data == ToWord('d', 'g') )
 		{
-			//OnWave();
 			Invalidate();
 			return;
 		}
