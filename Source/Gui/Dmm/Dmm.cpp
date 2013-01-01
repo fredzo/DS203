@@ -217,6 +217,7 @@ void CWndDmm::DisplayValue(float value, bool isErr, int position, int type, bool
 	// Label
 	if(redraw || type != values[position][5])
 	{
+		BIOS::LCD::Bar( x+((size/2+width)+4*space), y, x+4*size+8*width+16*space, y+14*scale, CWndDmm::cClr ); 
 		CUtils::Printf( x+((size/2+width)+4*space), y, CWndDmm::cLabel, CWndDmm::cOff, scale, CSettings::DmmMeasure::ppszTextType[type]);
 	}
 	y+=14*scale+2*space;

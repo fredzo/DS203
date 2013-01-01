@@ -122,17 +122,17 @@ public:
 
 	void ClearValueBg()
 	{
-		BIOS::LCD::Bar(m_rcClient.left+MarginLeft+12, m_rcClient.top, m_rcClient.right - 4, m_rcClient.bottom, HasFocus() ? RGB565(FFFFFF) : RGB565(B0B0B0));
+		BIOS::LCD::Bar(m_rcClient.left+MarginLeft+11, m_rcClient.top, m_rcClient.right - 4, m_rcClient.bottom, HasFocus() ? RGB565(FFFFFF) : RGB565(B0B0B0));
 	}
 
 	void ClearValueTopBg()
 	{
-		BIOS::LCD::Bar(m_rcClient.left+MarginLeft+12, m_rcClient.top, m_rcClient.right - 4, m_rcClient.top+16, HasFocus() ? RGB565(FFFFFF) : RGB565(B0B0B0));
+		BIOS::LCD::Bar(m_rcClient.left+MarginLeft+11, m_rcClient.top, m_rcClient.right - 4, m_rcClient.top+16, HasFocus() ? RGB565(FFFFFF) : RGB565(B0B0B0));
 	}
 
 	void ClearValueBottomBg()
 	{
-		BIOS::LCD::Bar(m_rcClient.left+MarginLeft+12, m_rcClient.top+16, m_rcClient.right - 4, m_rcClient.bottom, HasFocus() ? RGB565(FFFFFF) : RGB565(B0B0B0));
+		BIOS::LCD::Bar(m_rcClient.left+MarginLeft+11, m_rcClient.top+16, m_rcClient.right - 4, m_rcClient.bottom, HasFocus() ? RGB565(FFFFFF) : RGB565(B0B0B0));
 	}
 
 	virtual void OnPaint()

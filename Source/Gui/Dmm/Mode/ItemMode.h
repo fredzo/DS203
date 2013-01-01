@@ -1,42 +1,32 @@
-#ifndef __MENUITEMMEAS_H__
-#define __MENUITEMMEAS_H__
+#ifndef __MENUITEMMODE_H__
+#define __MENUITEMMODE_H__
 
-class CItemMeas : public CWndMenuItem
+class CItemMode : public CWndMenuItem
 {
 public:
-	CSettings::Measure* m_pMeas;
+	CSettings::DmmMeasure* m_pMeas;
 	ui16	m_color;
 
 public:
-	virtual void Create(CSettings::Measure* pMeas, CWnd *pParent) 
-	{
-		_ASSERT( pMeas );
-		m_pMeas = pMeas;
-		m_color = Settings.CH1.u16Color;
-		CWndMenuItem::Create( NULL, RGB565(000000), 2, pParent);
-		CWndMenuItem::SetColorPtr( &m_color );
-	}
 
-	void OnPaint(bool updateBg)
+	void OnPaint(bool updateBg) 
 	{
-		bool bEnabled = m_pMeas->Enabled == CSettings::Measure::_On;
+		bool bEnabled = m_pMeas->Enabled == CSettings::DmmMeasure::_On;
 		ui16 clr = bEnabled ? RGB565(000000) : RGB565(808080);
 		ui16 clr2 = RGB565(404040);
 
 		switch ( m_pMeas->Source )
 		{
-		case CSettings::Measure::_CH1: m_color = Settings.CH1.u16Color; break;
-		case CSettings::Measure::_CH2: m_color = Settings.CH2.u16Color; break;
-		case CSettings::Measure::_Math: m_color = Settings.Math.uiColor; break;
+		case CSettings::DmmMeasure::_CH1: m_color = Settings.CH1.u16Color; break;
+		case CSettings::DmmMeasure::_CH2: m_color = Settings.CH2.u16Color; break;
 		}
 		
 		int x = m_rcClient.left + 10 + MarginLeft;
 		int y = m_rcClient.top;
-
-		if(updateBg)
+		if(updateBg) 
 		{
 			CWndMenuItem::OnPaint();
-			BIOS::LCD::Print( x, y, clr, RGBTRANS, CSettings::Measure::ppszTextType[ (int)m_pMeas->Type ] );
+			BIOS::LCD::Print( x, y, clr, RGBTRANS, CSettings::DmmMeasure::ppszTextType[ (int)m_pMeas->Type ] );
 		}
 		else
 		{
@@ -46,8 +36,8 @@ public:
 		if ( bEnabled )
 		{
 			y += 16;
-			char str[16]; 
-			const char* suffix = CSettings::Measure::ppszTextSuffix[ (int)m_pMeas->Type ];
+			char str[16];
+			const char* suffix = CSettings::DmmMeasure::ppszTextSuffix[ (int)m_pMeas->Type ];
 			float fValue = m_pMeas->fValue;
 			if ( fValue < 0 )
 			{
@@ -68,6 +58,15 @@ public:
 		}
 	}
 
+	virtual void Create(CSettings::DmmMeasure* pMeas, CWnd *pParent) 
+	{
+		_ASSERT( pMeas );
+		m_pMeas = pMeas;
+		m_color = Settings.CH1.u16Color;
+		CWndMenuItem::Create( NULL, RGB565(000000), 2, pParent);
+		CWndMenuItem::SetColorPtr( &m_color );
+	}
+
 	virtual void OnPaint()
 	{
 		OnPaint(true);
@@ -82,7 +81,7 @@ public:
 			DecEnum(m_pMeas->Type);
 			Invalidate();
 		}
-		if ( nKey & BIOS::KEY::KeyRight && m_pMeas->Type < CSettings::Measure::_MaxType )
+		if ( nKey & BIOS::KEY::KeyRight && m_pMeas->Type < CSettings::DmmMeasure::_MaxType )
 		{
 			_ASSERT(sizeof(m_pMeas->Type) == sizeof(NATIVEENUM));
 			IncEnum(m_pMeas->Type);
