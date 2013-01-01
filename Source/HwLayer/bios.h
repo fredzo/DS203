@@ -35,6 +35,7 @@ public:
 		static void Set( int nKey, int nValue );
 		static int Get( int nKey, int nSub = 0 );
 		static int GetTemperature();
+		static int GetCoreVoltage();
 		static void Standby( bool bEnterSleep );
 	};
 
@@ -179,18 +180,11 @@ public:
 		static BOOL Close(FILEINFO* pFileInfo, int nSize = -1);
 	};
 
-	class FFT
-	{	
-	public:	
-		static void Window( si16* arrSignal, const ui16* arrWindowHalf, int n );
-		static void Convert( si16* arrOutput, si16* arrInput, int n );	
-		static ui32 Sqrt( ui32 value );
-	};
-
 	class SERIAL
 	{
 	public:
 		static void Init();
+		static void Configure(int nBaudrate);
 		static void Send(const char* strBuf);
 		static int Getch();
 		static void Putch(char ch);
