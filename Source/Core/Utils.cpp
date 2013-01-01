@@ -134,7 +134,22 @@ ui16 CUtils::InterpolateColor( ui16 clrA, ui16 clrB, int nLevel )
 	return RGB565RGB(ar, ag, ab);
 }
 
-
+int CUtils::Sqrt(int a)
+{
+	int ret=0;
+	int s;
+	int ret_sq=-a-1;
+	for(s=30; s>=0; s-=2){
+		int b;
+		ret+= ret;
+		b=ret_sq + ((2*ret+1)<<s);
+		if(b<0){
+			ret_sq=b;
+			ret++;
+		}
+	}
+	return ret;
+}
 /*static*/ int _DrawChar(int x, int y, unsigned short clrf, unsigned short clrb, char ch, int scale)
 {
 	const unsigned char *pFont = BIOS::LCD::GetFont(ch);
@@ -148,9 +163,9 @@ ui16 CUtils::InterpolateColor( ui16 clrA, ui16 clrB, int nLevel )
 			{
 				if ( col & 128 )
 				{
-					for(int i=0 ; i<=scale ; i++)
+					for(int i=0 ; i<scale ; i++)
 					{
-						for(int j=0 ; j<=scale ; j++)
+						for(int j=0 ; j<scale ; j++)
 						{
 							BIOS::LCD::PutPixel(x+_x+i, y+_y+j, clrf);
 						}
@@ -168,9 +183,9 @@ ui16 CUtils::InterpolateColor( ui16 clrA, ui16 clrB, int nLevel )
 			{
 				if ( (col & 128) == 0 )
 				{
-					for(int i=0 ; i<=scale ; i++)
+					for(int i=0 ; i<scale ; i++)
 					{
-						for(int j=0 ; j<=scale ; j++)
+						for(int j=0 ; j<scale ; j++)
 						{
 							BIOS::LCD::PutPixel(x+_x+i, y+_y+j, clrb);
 						}
@@ -186,9 +201,9 @@ ui16 CUtils::InterpolateColor( ui16 clrA, ui16 clrB, int nLevel )
 	
 			for (ui8 _x=0; _x<(8*scale); _x+=scale, col <<= 1)
 			{
-				for(int i=0 ; i<=scale ; i++)
+				for(int i=0 ; i<scale ; i++)
 				{
-					for(int j=0 ; j<=scale ; j++)
+					for(int j=0 ; j<scale ; j++)
 					{
 						if ( col & 128 )
 						{
@@ -226,6 +241,11 @@ ui16 CUtils::InterpolateColor( ui16 clrA, ui16 clrB, int nLevel )
 
 /*static*/ int CUtils::Print (int x, int y, unsigned short clrf, unsigned short clrb, int scale, const char *str)
 {
+	if(scale <= 1)
+	{
+		return BIOS::LCD::Print(x,y,clrf,clrb,str);
+	}
+
 	if (!str || !*str)
 		return 0;
 	int _x = x;

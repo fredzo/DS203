@@ -59,9 +59,17 @@ CSettings* CSettings::m_pInstance = NULL;
 		{ "Minimum", "Maximum", "Average", "RMS", "RectAvg", "Vpp", "Freq", "Period", "FormFact", "Sigma", "Variance", "Baud" };
 /*static*/ const char* const CSettings::Measure::ppszTextSuffix[] =
 		{ "V", "V", "V", "V", "V", "V", "kHz", "ms", "", "", "", "" };
-
 /*static*/ const char* const CSettings::Measure::ppszTextRange[] =
 		{ "View", "Selection", "All" };
+
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextEnabled[] =
+		{ "Off", "On" };
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextSource[] =
+		{ "CH1", "CH2" };
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextType[] =
+		{ "Minimum", "Maximum", "Average", "RMS", "RectAvg", "Vpp", "Freq", "Period", "FormFact", "Sigma", "Variance", "Baud" };
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextSuffix[] =
+		{ "V", "V", "V", "V", "V", "V", "kHz", "ms", "", "", "", "" };
 
 /*static*/ const char* const CSettings::MathOperator::ppszTextType[] = 
 		{"Off", "A", "B", "C", "A+B+C", "A-B+C", "B-A+C", "(A>B)+C", "(A<B)+C", "min(A,B)", "max(A,B)"};
@@ -231,6 +239,22 @@ void CSettings::Reset()
 	Meas[5].Type = Measure::_Vpp;
 	Meas[5].Range = Measure::_View;
 	Meas[5].fValue = 0;
+
+	// DmmMeas
+	DmmMeas[0].Enabled = DmmMeasure::_On;
+	DmmMeas[0].Source = DmmMeasure::_CH1;
+	DmmMeas[0].Type = DmmMeasure::_Rms;
+	DmmMeas[0].fValue = 0;
+
+	DmmMeas[1].Enabled = DmmMeasure::_On;
+	DmmMeas[1].Source = DmmMeasure::_CH1;
+	DmmMeas[1].Type = DmmMeasure::_Min;
+	DmmMeas[1].fValue = 0;
+
+	DmmMeas[2].Enabled = DmmMeasure::_On;
+	DmmMeas[2].Source = DmmMeasure::_CH1;
+	DmmMeas[2].Type = DmmMeasure::_Max;
+	DmmMeas[2].fValue = 0;
 
 	MathA.nConstant = 0;
 	MathA.nScale = 100;

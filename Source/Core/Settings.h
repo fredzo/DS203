@@ -6,7 +6,7 @@
 #include <Source/HwLayer/Bios.h>
 #include "Serialize.h"
 
-#define _VERSION ToDword('D', 'S', 'C', 10)
+#define _VERSION ToDword('D', 'S', 'C', 11)
 
 class CSettings : public CSerialize
 {
@@ -229,6 +229,33 @@ public:
 			return *this;
 		}
 	};
+	class DmmMeasure : public CSerialize {
+	public:
+		static const char* const ppszTextEnabled[];
+		static const char* const ppszTextSource[];
+		static const char* const ppszTextType[];
+		static const char* const ppszTextSuffix[];
+
+		enum { _Off, _On, _MaxEnabled = _On }
+			Enabled;
+		enum ESource { _CH1, _CH2, _MaxSource = _CH2 }
+			Source; 
+		enum { _Min, _Max, _Avg, _Rms, _RectAvg, _Vpp, _Freq, _Period, _FormFactor, _Sigma, _Dispersion, _MaxType = _Dispersion }
+			Type;
+		
+		float fValue;
+
+		virtual CSerialize& operator <<( CStream& stream )
+		{
+			stream << _E(Enabled) << _E(Source) << _E(Type);
+			return *this;
+		}
+		virtual CSerialize& operator >>( CStream& stream )
+		{
+			stream >> _E(Enabled) >> _E(Source) >> _E(Type);
+			return *this;
+		}
+	};
 	class MathOperand : public CSerialize
 	{
 	public:
@@ -414,6 +441,7 @@ public:
 	Marker		MarkY1;
 	Marker		MarkY2;
 	Measure		Meas[6];
+	DmmMeasure 	DmmMeas[3];
 
 	MathOperand MathA;
 	MathOperand MathB;
@@ -436,6 +464,7 @@ public:
 		stream << dwId << Runtime << CH1 << CH2 << CH3 << CH4 << Time << Trig << Gen
 			<< MarkT1 << MarkT2 << MarkY1 << MarkY2
 			<< Meas[0] << Meas[1] << Meas[2] << Meas[3] << Meas[4] << Meas[5]
+			<< DmmMeas[0] << DmmMeas[1] << DmmMeas[2]
 			<< MathA << MathB << MathC << Math
 			<< Spec
 			<< dwEnd;
@@ -454,6 +483,7 @@ public:
 			stream >> Runtime >> CH1 >> CH2 >> CH3 >> CH4 >> Time >> Trig >> Gen
 				>> MarkT1 >> MarkT2 >> MarkY1 >> MarkY2
 				>> Meas[0] >> Meas[1] >> Meas[2] >> Meas[3] >> Meas[4] >> Meas[5]
+				>> DmmMeas[0] >> DmmMeas[1] >> DmmMeas[2] 
 				>> MathA >> MathB >> MathC >> Math
 				>> Spec
 				>> dwEnd;
