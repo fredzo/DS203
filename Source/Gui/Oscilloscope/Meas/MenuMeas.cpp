@@ -69,13 +69,7 @@
 		m_wndListMeas.StartModal( &m_wndListMeas.m_itmEnabled );
 		return;
 	}
-	if ( code == ToWord('o', 'k') && pSender == &m_wndListMeas )
-	{
-		// done
-		m_wndListMeas.StopModal();
-		return;
-	}
-	if ( code == ToWord('e', 'x') && pSender == &m_wndListMeas )
+	if ( (code == ToWord('o', 'k') || code == ToWord('e', 'x') || code == ToWord('l', 'e')) )
 	{
 		// done
 		m_wndListMeas.StopModal();
