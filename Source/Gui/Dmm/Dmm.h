@@ -12,12 +12,11 @@ public:
 	static const ui16 cOn = RGB565(11bbff);
 	static const ui16 cOff = RGB565(050505);
 	static const ui16 cClr = RGB565(000000);
-	static const int  valuesNumber = 3;
 
 	float m_fAverage, m_fVariance;
 	bool bRefresh;
 	bool bTimer;
-	int values[valuesNumber][6];
+	int values[3][6];
 
 	CWndDmm()
 	{
@@ -31,10 +30,15 @@ public:
 		CWnd::Create("CWndUserDmm", dwFlags | CWnd::WsListener | CWnd::WsNoActivate, CRect(0, 16, 320-CWndMenuItem::MarginLeft, 240), pParent);
 	}
 
-	void DisplayValue(float value, bool isErr, int position, int type, bool redraw);
+	void DisplayValue(float value, bool isErr, int position, int type, bool redraw, bool refreshValue);
 	void DrawDigit(int x, int y, int width, int size, int space, int n, ui16 clrOn, ui16 clrOff );
 
-	virtual void OnPaint();
+	void OnPaint(bool updateBg);
+
+	virtual void OnPaint()
+	{
+		OnPaint(true);
+	}
 
 	virtual void OnTimer()
 	{
@@ -60,16 +64,7 @@ public:
 
 		if ( pSender == NULL && code == WmBroadcast && data == ToWord('d', 'g') )
 		{
-			// TODO make refresh rate configurable
-			// No more than one refresh each 500 ms
-			if (bTimer)
-			{
-				return;
-			}
-			KillTimer();
-			SetTimer(500);
-			bTimer = true;
-			Invalidate();
+			OnPaint(false);
 			return;
 		}
 	}

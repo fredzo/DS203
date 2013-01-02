@@ -135,7 +135,7 @@ void _DrawDot0(int x, int y, int width, int size, int space, ui16 clr)
 	BIOS::LCD::Bar( x, y, x+(width/4)*3, y+(width/4)*3, clr );
 }
 
-void CWndDmm::OnPaint()
+void CWndDmm::OnPaint(bool updateBg)
 {
 	if ( CWnd::m_rcOverlay.IsValid() )
 	{	// Do not redraw screen if modal window is active, but prepare for a refresh when it's closed
@@ -143,26 +143,40 @@ void CWndDmm::OnPaint()
 		return;
 	}
 
-	bool isErr = false; //(m_fAverage < 16 || m_fAverage > 240);
-	float fValue;
-	// Draw values
-	for(int i = 0 ; i < valuesNumber ; i++)
-	{
-		fValue = Settings.DmmMeas[i].fValue;
-		DisplayValue(fValue,isErr,i,Settings.DmmMeas[i].Type,bRefresh);
+	bool refreshValue = false;
+	// TODO make refresh rate configurable
+	// No more than one refresh each 500 ms for values
+	if (!bTimer)
+	{	// Only delay next update if we were not refreshing
+		if(!updateBg && !bRefresh)
+		{
+			KillTimer();
+			SetTimer(500);
+			bTimer = true;
+		}
+		refreshValue = true;
 	}
-	
+	// Draw values
+	DisplayValue(Settings.DmmMeas[0].fValue,false,0,Settings.DmmMeas[0].Type,bRefresh,refreshValue);
+	DisplayValue(Settings.DmmMeas[1].fValue,false,1,Settings.DmmMeas[1].Type,bRefresh,refreshValue);
+	DisplayValue(Settings.DmmMeas[2].fValue,false,2,Settings.DmmMeas[2].Type,bRefresh,refreshValue);
 	if ( bRefresh )
 	{
 		bRefresh = false;
 	}
 
+	// Draw Bargraph
+	// Draw Graduation
+	if(updateBg)
+	{
+	}
+	
 	// Draw bottom line
 	//BIOS::LCD::Printf( 8, 220, RGB565(808080), RGB565(ffffff), "adc=%3f cal=%3f var=%3f range=%s ", m_fAverage, fCorrect, m_fVariance, CSettings::AnalogChannel::ppszTextResolution[Settings.CH1.Resolution]);
 
 }
 
-void CWndDmm::DisplayValue(float value, bool isErr, int position, int type, bool redraw)
+void CWndDmm::DisplayValue(float value, bool isErr, int position, int type, bool redraw, bool refreshValue)
 {
 	char newDisplay[12];
 	bool negative = value < 0;
@@ -214,71 +228,73 @@ void CWndDmm::DisplayValue(float value, bool isErr, int position, int type, bool
 	default:
 		_ASSERT( !!!"Invalid position" );
 	}
-	// Label
-	if(redraw || type != values[position][5])
-	{
+	bool refreshAll = (redraw || type != values[position][5]);
+	if(refreshAll)
+	{	// Label
 		BIOS::LCD::Bar( x+((size/2+width)+4*space), y, x+4*size+8*width+16*space, y+14*scale, CWndDmm::cClr ); 
 		CUtils::Printf( x+((size/2+width)+4*space), y, CWndDmm::cLabel, CWndDmm::cOff, scale, CSettings::DmmMeasure::ppszTextType[type]);
 	}
-	y+=14*scale+2*space;
-	// Value
-	int i;
-	const char* pDisplay = newDisplay;
-	for (i=0; i < 5; i++)
+	if(refreshAll || refreshValue)
 	{
-		int nDigit = *pDisplay;
-		if(nDigit == 0) 
-		{  // End of string
-			nDigit = ' ';
-		}
-		else 
+		y+=14*scale+2*space;
+		// Value
+		int i;
+		const char* pDisplay = newDisplay;
+		for (i=0; i < 5; i++)
 		{
-			if ((i < 4) && (pDisplay[1] == '.'))
+			int nDigit = *pDisplay;
+			if(nDigit == 0) 
+			{  // End of string
+				nDigit = ' ';
+			}
+			else 
 			{
-				nDigit |= 128;
+				if ((i < 4) && (pDisplay[1] == '.'))
+				{
+					nDigit |= 128;
+					pDisplay++;
+				}
 				pDisplay++;
 			}
-			pDisplay++;
-		}
-		if(redraw || nDigit != values[position][i])
-		{
-			if(i == 0)
-			{	// Minus sign
-				if(nDigit ==  '-')
-				{
-					_DrawMinus( x, y+width/2+size+2*space-1, width, size/2+width, CWndDmm::cOn );
+			if(redraw || nDigit != values[position][i])
+			{
+				if(i == 0)
+				{	// Minus sign
+					if(nDigit ==  '-')
+					{
+						_DrawMinus( x, y+width/2+size+2*space-1, width, size/2+width, CWndDmm::cOn );
+					}
+					else
+					{
+						_DrawMinus( x, y+width/2+size+2*space-1, width, size/2+width, CWndDmm::cOff );
+					}
 				}
 				else
-				{
-					_DrawMinus( x, y+width/2+size+2*space-1, width, size/2+width, CWndDmm::cOff );
+				{	// Other digits
+		 			DrawDigit(x, y, width, size, space, nDigit, CWndDmm::cOn, CWndDmm::cOff);
 				}
+				values[position][i] = nDigit;
+			}
+			if(i == 0)
+			{
+				x+=((size/2+width)+3*space+scale*space);
+			}
+			else if(i == 4)
+			{
+				x+=(size+width+4*space+scale*space);
 			}
 			else
-			{	// Other digits
-		 		DrawDigit(x, y, width, size, space, nDigit, CWndDmm::cOn, CWndDmm::cOff);
+			{
+				x+=(size+2*width+7*space);
 			}
-			values[position][i] = nDigit;
 		}
-		if(i == 0)
-		{
-			x+=((size/2+width)+3*space+scale*space);
-		}
-		else if(i == 4)
-		{
-			x+=(size+width+4*space+scale*space);
-		}
-		else
-		{
-			x+=(size+2*width+7*space);
+		if(refreshAll)
+		{	// Unit
+			BIOS::LCD::Bar( x, y, x+24*scale, y+14*scale, CWndDmm::cClr ); 
+			CUtils::Printf( x, y, CWndDmm::cOn, CWndDmm::cClr, scale, CSettings::DmmMeasure::ppszTextSuffix[type]);
+			values[position][5] = type;
 		}
 	}
-	// Unit
-	if(redraw || type != values[position][5])
-	{
-		CUtils::Printf( x, y, CWndDmm::cOn, CWndDmm::cClr, scale, CSettings::DmmMeasure::ppszTextSuffix[type]);
-		values[position][5] = type;
-	}
-
 }
 
 void CWndDmm::DrawDigit(int x, int y, int width, int size, int space, int nDigit, ui16 clrOn, ui16 clrOff)

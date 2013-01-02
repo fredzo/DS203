@@ -94,7 +94,6 @@ public:
 		}
 		CWnd::OnKey( nKey );
 	}
-
 };
 
 #endif
