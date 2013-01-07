@@ -45,7 +45,7 @@ public:
 	CWndMenuDisplay		m_wndMenuDisplay;
 	CWndMenuMask		m_wndMenuMask;
 	CWndMenuGenerator	m_wndMenuGenerator;
-	CWndMenuGeneratorMod	m_wndMenuGeneratorMod;
+//	CWndMenuGeneratorMod	m_wndMenuGeneratorMod;
 	CWndMenuGeneratorEdit	m_wndMenuGeneratorEdit;
 	CWndMenuMath		m_wndMenuMath;
 	CWndZoomBar			m_wndZoomBar;
@@ -81,6 +81,7 @@ public:
 	virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data);
 	void OnTimer();
 	virtual void WindowMessage(int nMsg, int nParam =0);
+	bool HasOverlay();
 
 private:
 	// auto trigger

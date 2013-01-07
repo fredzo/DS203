@@ -92,7 +92,14 @@ void DrawTriangle(int x, int y, int size, bool half, ui8 quadrant, ui16 clr)
 
 void _DrawMinus(int x, int y, int width, int size, ui16 clr)
 {
-	BIOS::LCD::Bar( x, y, x+size, y+width, clr ); 
+	if(width > 4)
+	{
+		BIOS::LCD::RoundRect( x, y, x+size, y+width, clr ); 
+	}
+	else
+	{
+		BIOS::LCD::Bar( x, y, x+size, y+width, clr ); 
+	}
 }
 
 void _DrawDigitHT(int x, int y, int width, int size, ui16 clr)
@@ -160,20 +167,69 @@ void CWndDmm::OnPaint(bool updateBg)
 	DisplayValue(Settings.DmmMeas[0].fValue,false,0,Settings.DmmMeas[0].Type,bRefresh,refreshValue);
 	DisplayValue(Settings.DmmMeas[1].fValue,false,1,Settings.DmmMeas[1].Type,bRefresh,refreshValue);
 	DisplayValue(Settings.DmmMeas[2].fValue,false,2,Settings.DmmMeas[2].Type,bRefresh,refreshValue);
-	if ( bRefresh )
-	{
-		bRefresh = false;
-	}
-
+	
 	// Draw Bargraph
+	int x = 34;
+	int y = 200;
+	int barLength = (int)(Settings.DmmMeas[0].fValue*300);
+	if(barLength > 301)
+	{
+		barLength = 301;
+	}
+	else if (barLength < 0)
+	{
+		barLength = 0;
+	}
+	BIOS::LCD::Bar( x-1, y-8, x+barLength, y-4,  CWndDmm::cOn );
+	BIOS::LCD::Bar( x+barLength+1, y-8, x+302, y-4,  CWndDmm::cClr );
+
+
 	// Draw Graduation
 	if(updateBg)
 	{
+		for(int i = 0 ; i <= 20 ; i++)
+		{
+			y = 200;
+			if (i%10 == 0)
+			{
+				BIOS::LCD::Bar( x-1, y-4, x+1, y+2,  CWndDmm::cOn );
+				BIOS::LCD::Printf(i==0 ? x-4 : i == 10 ? x-8: x-12 ,y+2,CWndDmm::cLabel, CWndDmm::cOff, "%d", i*5);
+			}
+			else if(i%5 == 0)
+			{
+				BIOS::LCD::Bar( x-1, y-2, x+1, y+2,  CWndDmm::cOn );
+				BIOS::LCD::Printf(x-8,y+2,CWndDmm::cLabel, CWndDmm::cOff, "%d", i*5);
+			} 
+			else
+			{
+				BIOS::LCD::Bar( x, y, x+1, y+2,  CWndDmm::cOn );
+			}
+			x+=15;
+		}
 	}
 	
 	// Draw bottom line
 	//BIOS::LCD::Printf( 8, 220, RGB565(808080), RGB565(ffffff), "adc=%3f cal=%3f var=%3f range=%s ", m_fAverage, fCorrect, m_fVariance, CSettings::AnalogChannel::ppszTextResolution[Settings.CH1.Resolution]);
+	if(updateBg || bRefresh)
+	{
+		int x = 34, y = 226;
+		int _x = x;
+		x += BIOS::LCD::Print( x, y, Settings.CH1.u16Color, RGB565(000000), "CH1: " );
+		x += BIOS::LCD::Print( x, y, RGB565(ffffff), RGB565(000000), 
+			CSettings::AnalogChannel::ppszTextResolution[ Settings.CH1.Resolution ]);
+		
+		x = _x + 100;
+		x += BIOS::LCD::Print( x, y, Settings.CH2.u16Color, RGB565(000000), "CH2: " );
+		x += BIOS::LCD::Print( x, y, RGB565(ffffff), RGB565(000000), 
+			CSettings::AnalogChannel::ppszTextResolution[ Settings.CH2.Resolution ]);
 
+		x = _x + 200;
+		x += BIOS::LCD::Print( x, y, RGB565(b0b0b0), RGB565(000000), "T: " );
+		x += BIOS::LCD::Print( x, y, RGB565(ffffff), RGB565(000000), 
+			CSettings::TimeBase::ppszTextResolution[ Settings.Time.Resolution ]);
+	}
+
+	bRefresh = false;
 }
 
 void CWndDmm::DisplayValue(float value, bool isErr, int position, int type, bool redraw, bool refreshValue)
@@ -232,7 +288,7 @@ void CWndDmm::DisplayValue(float value, bool isErr, int position, int type, bool
 	if(refreshAll)
 	{	// Label
 		BIOS::LCD::Bar( x+((size/2+width)+4*space), y, x+4*size+8*width+16*space, y+14*scale, CWndDmm::cClr ); 
-		CUtils::Printf( x+((size/2+width)+4*space), y, CWndDmm::cLabel, CWndDmm::cOff, scale, CSettings::DmmMeasure::ppszTextType[type]);
+		CUtils::Print( x+((size/2+width)+4*space), y, CWndDmm::cLabel, CWndDmm::cOff, scale, CSettings::DmmMeasure::ppszTextType[type]);
 	}
 	if(refreshAll || refreshValue)
 	{
@@ -291,7 +347,7 @@ void CWndDmm::DisplayValue(float value, bool isErr, int position, int type, bool
 		if(refreshAll)
 		{	// Unit
 			BIOS::LCD::Bar( x, y, x+24*scale, y+14*scale, CWndDmm::cClr ); 
-			CUtils::Printf( x, y, CWndDmm::cOn, CWndDmm::cClr, scale, CSettings::DmmMeasure::ppszTextSuffix[type]);
+			CUtils::Print( x, y, CWndDmm::cOn, CWndDmm::cClr, scale, CSettings::DmmMeasure::ppszTextSuffix[type]);
 			values[position][5] = type;
 		}
 	}

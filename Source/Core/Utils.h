@@ -17,6 +17,8 @@ public:
 	static char* MidiNote(int n);
 	static char* FormatVoltage( float fV, int nChars=8 );
 	static char* FormatFrequency( float fF, int nChars=8 );
+	static char* FormatTime( float fT, int nChars=8 );
+	static char* FormatFloat5( float f );
 
 	static int Printf (int x, int y, unsigned short clrf, unsigned short clrb, int scale, const char* format, ...);
 	static int Print (int x, int y, unsigned short clrf, unsigned short clrb, int scale, char* str);
