@@ -13,7 +13,10 @@ public:
 	static const ui16 cOff = RGB565(050505);
 	static const ui16 cClr = RGB565(000000);
 
-	float m_fAverage, m_fVariance;
+	int m_currentBargraph;
+	bool m_bargraphPositive;
+	int m_targetBargraph;
+	int m_tickCounter;
 	bool bRefresh;
 	bool bTimer;
 	int values[3][6];
@@ -21,17 +24,23 @@ public:
 	CWndDmm()
 	{
 		bRefresh = true;
-		m_fAverage = 0;
+		m_currentBargraph = 0;
+		m_bargraphPositive = true;
+		m_targetBargraph = 0;
+		m_tickCounter = 0;
 		bTimer = false;
 	}
 	
 	virtual void Create(CWnd *pParent, ui16 dwFlags)
 	{
-		CWnd::Create("CWndUserDmm", dwFlags | CWnd::WsListener | CWnd::WsNoActivate, CRect(0, 16, 320-CWndMenuItem::MarginLeft, 240), pParent);
+		CWnd::Create("CWndUserDmm", dwFlags | CWnd::WsTick | CWnd::WsListener | CWnd::WsNoActivate, CRect(0, 16, 320-CWndMenuItem::MarginLeft, 240), pParent);
 	}
 
 	void DisplayValue(float value, bool isErr, int position, int type, bool redraw, bool refreshValue);
 	void DrawDigit(int x, int y, int width, int size, int space, int n, ui16 clrOn, ui16 clrOff );
+	void UpdateBargraphValue();
+	void UpdateBargraphDisplay();
+	void OnTick();
 
 	void OnPaint(bool updateBg);
 
@@ -65,6 +74,13 @@ public:
 		if ( pSender == NULL && code == WmBroadcast && data == ToWord('d', 'g') )
 		{
 			OnPaint(false);
+			return;
+		}
+
+		if (code == ToWord('t', 'i') )
+		{
+			// OnTick
+			OnTick();
 			return;
 		}
 	}

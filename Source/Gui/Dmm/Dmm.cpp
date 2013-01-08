@@ -168,25 +168,14 @@ void CWndDmm::OnPaint(bool updateBg)
 	DisplayValue(Settings.DmmMeas[1].fValue,false,1,Settings.DmmMeas[1].Type,bRefresh,refreshValue);
 	DisplayValue(Settings.DmmMeas[2].fValue,false,2,Settings.DmmMeas[2].Type,bRefresh,refreshValue);
 	
-	// Draw Bargraph
-	int x = 34;
-	int y = 200;
-	int barLength = (int)(Settings.DmmMeas[0].fValue*300);
-	if(barLength > 301)
-	{
-		barLength = 301;
-	}
-	else if (barLength < 0)
-	{
-		barLength = 0;
-	}
-	BIOS::LCD::Bar( x-1, y-8, x+barLength, y-4,  CWndDmm::cOn );
-	BIOS::LCD::Bar( x+barLength+1, y-8, x+302, y-4,  CWndDmm::cClr );
-
+	UpdateBargraphValue();
+	OnTick();
 
 	// Draw Graduation
 	if(updateBg)
 	{
+		int x = 34;
+		int y = 200;
 		for(int i = 0 ; i <= 20 ; i++)
 		{
 			y = 200;
@@ -230,6 +219,70 @@ void CWndDmm::OnPaint(bool updateBg)
 	}
 
 	bRefresh = false;
+}
+
+void CWndDmm::UpdateBargraphValue() 
+{
+	m_targetBargraph = (int)(Settings.DmmMeas[0].fValue*300);
+	if(m_targetBargraph < 0)
+	{
+		m_bargraphPositive = false;
+		m_targetBargraph = -m_targetBargraph;
+	}
+	else
+	{
+		m_bargraphPositive = true;
+	}
+	if(m_targetBargraph > 301)
+	{
+		m_targetBargraph = 301;
+	}
+	else if (m_targetBargraph < 0)
+	{
+		m_targetBargraph = 0;
+	}
+}
+
+void CWndDmm::UpdateBargraphDisplay() 
+{
+	// Draw Bargraph
+	int x = 34;
+	int y = 200;
+	// Plus / minus sight
+	BIOS::LCD::Bar( x-7, y-8, x-5, y-2,  m_bargraphPositive ? CWndDmm::cOn : CWndDmm::cClr);
+	BIOS::LCD::Bar( x-9, y-6, x-3, y-4,  CWndDmm::cOn );
+	// Bargraph
+	BIOS::LCD::Bar( x-1, y-8, x+m_currentBargraph, y-4,  CWndDmm::cOn );
+	BIOS::LCD::Bar( x+m_currentBargraph+1, y-8, x+302, y-4,  CWndDmm::cClr );
+}
+
+void CWndDmm::OnTick() 
+{
+	if(m_currentBargraph != m_targetBargraph)
+	{
+		if(m_tickCounter <= 0)
+		{
+			int diff = (m_targetBargraph - m_currentBargraph);
+			bool negative = diff < 0;
+			m_tickCounter = 3000/abs(diff);
+			if(negative)
+			{
+				m_currentBargraph--;
+			}
+			else
+			{
+				m_currentBargraph++;
+			}
+			UpdateBargraphDisplay();
+			//char test[32];
+			//BIOS::DBG::sprintf(test, "cur:%d tarw:%d tick:%d\n", m_currentBargraph, m_targetBargraph, m_tickCounter);
+			//BIOS::SERIAL::Send(test);
+		}
+		else
+		{
+			m_tickCounter--;
+		}
+	}
 }
 
 void CWndDmm::DisplayValue(float value, bool isErr, int position, int type, bool redraw, bool refreshValue)
