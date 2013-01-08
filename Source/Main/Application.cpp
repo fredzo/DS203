@@ -116,7 +116,13 @@ bool CApplication::operator ()()
 	GLOBAL.m_wndMain.WindowMessage( CWnd::WmTick, 0 );
 
 #ifdef _WIN32
-	Sleep(1);
+	// Sleep 1 ms is too long => divide this value by 10 to have something that approaches the quad's behaviour
+	static int count = 0;
+    if (count >= 10) { // Kind of like sleeping for 0.1 milliseconds
+        Sleep(1);
+        count = 0;
+    }
+    count++;
 #endif
 	return true;
 }

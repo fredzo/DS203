@@ -169,7 +169,7 @@ void CWndDmm::OnPaint(bool updateBg)
 	DisplayValue(Settings.DmmMeas[2].fValue,false,2,Settings.DmmMeas[2].Type,bRefresh,refreshValue);
 	
 	UpdateBargraphValue();
-	OnTick();
+	OnTick(true);
 
 	// Draw Graduation
 	if(updateBg)
@@ -256,11 +256,11 @@ void CWndDmm::UpdateBargraphDisplay()
 	BIOS::LCD::Bar( x+m_currentBargraph+1, y-8, x+302, y-4,  CWndDmm::cClr );
 }
 
-void CWndDmm::OnTick() 
+void CWndDmm::OnTick(bool force) 
 {
 	if(m_currentBargraph != m_targetBargraph)
 	{
-		if(m_tickCounter <= 0)
+		if(force || m_tickCounter <= 0)
 		{
 			int diff = (m_targetBargraph - m_currentBargraph);
 			bool negative = diff < 0;
@@ -282,6 +282,10 @@ void CWndDmm::OnTick()
 		{
 			m_tickCounter--;
 		}
+	}
+	else if(force)
+	{
+		UpdateBargraphDisplay();
 	}
 }
 

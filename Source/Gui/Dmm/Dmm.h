@@ -40,7 +40,7 @@ public:
 	void DrawDigit(int x, int y, int width, int size, int space, int n, ui16 clrOn, ui16 clrOff );
 	void UpdateBargraphValue();
 	void UpdateBargraphDisplay();
-	void OnTick();
+	void OnTick(bool force);
 
 	void OnPaint(bool updateBg);
 
@@ -80,7 +80,7 @@ public:
 		if (code == ToWord('t', 'i') )
 		{
 			// OnTick
-			OnTick();
+			OnTick(false);
 			return;
 		}
 	}
