@@ -12,6 +12,9 @@ public:
 	static const ui16 cOn = RGB565(11bbff);
 	static const ui16 cOff = RGB565(050505);
 	static const ui16 cClr = RGB565(000000);
+	// Positions
+	static const int cBargraphLeft = 34;
+	static const int cBargraphTop = 200;
 
 	int m_currentBargraph;
 	bool m_bargraphPositive;

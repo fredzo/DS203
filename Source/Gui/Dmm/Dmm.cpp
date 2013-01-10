@@ -174,11 +174,10 @@ void CWndDmm::OnPaint(bool updateBg)
 	// Draw Graduation
 	if(updateBg)
 	{
-		int x = 34;
-		int y = 200;
+		int x = CWndDmm::cBargraphLeft;
+		int y = CWndDmm::cBargraphTop;
 		for(int i = 0 ; i <= 20 ; i++)
 		{
-			y = 200;
 			if (i%10 == 0)
 			{
 				BIOS::LCD::Bar( x-1, y-4, x+1, y+2,  CWndDmm::cOn );
@@ -186,12 +185,12 @@ void CWndDmm::OnPaint(bool updateBg)
 			}
 			else if(i%5 == 0)
 			{
-				BIOS::LCD::Bar( x-1, y-2, x+1, y+2,  CWndDmm::cOn );
+				BIOS::LCD::Bar( x-1, y-4, x+1, y,  CWndDmm::cOn );
 				BIOS::LCD::Printf(x-8,y+2,CWndDmm::cLabel, CWndDmm::cOff, "%d", i*5);
 			} 
 			else
 			{
-				BIOS::LCD::Bar( x, y, x+1, y+2,  CWndDmm::cOn );
+				BIOS::LCD::Bar( x-1, y-4, x, y-2,  CWndDmm::cOn );
 			}
 			x+=15;
 		}
@@ -246,14 +245,36 @@ void CWndDmm::UpdateBargraphValue()
 void CWndDmm::UpdateBargraphDisplay() 
 {
 	// Draw Bargraph
-	int x = 34;
-	int y = 200;
-	// Plus / minus sight
+	int x = CWndDmm::cBargraphLeft;
+	int y = CWndDmm::cBargraphTop;
+	// Plus / minus sign
 	BIOS::LCD::Bar( x-7, y-8, x-5, y-2,  m_bargraphPositive ? CWndDmm::cOn : CWndDmm::cClr);
 	BIOS::LCD::Bar( x-9, y-6, x-3, y-4,  CWndDmm::cOn );
 	// Bargraph
-	BIOS::LCD::Bar( x-1, y-8, x+m_currentBargraph, y-4,  CWndDmm::cOn );
-	BIOS::LCD::Bar( x+m_currentBargraph+1, y-8, x+302, y-4,  CWndDmm::cClr );
+	for(int i=0; i <= m_currentBargraph ; i++, x++)
+	{
+		if (i%150 == 0)
+		{
+			BIOS::LCD::Bar( x-1, y-12, x+1, y-4,  CWndDmm::cOn );
+			x++;
+			i++;
+		}
+		else if(i%75 == 0)
+		{
+			BIOS::LCD::Bar( x-1, y-10, x+1, y-4,  CWndDmm::cOn );
+			x++;
+			i++;
+		} 
+		else if(i%15 == 0)
+		{
+			BIOS::LCD::Bar( x-1, y-10, x, y-4,  CWndDmm::cOn );
+		} 
+		else
+		{
+			BIOS::LCD::Bar( x-1, y-8, x, y-4,  CWndDmm::cOn );
+		}
+	}
+	BIOS::LCD::Bar( CWndDmm::cBargraphLeft+m_currentBargraph+1, y-12, CWndDmm::cBargraphLeft+302, y-4,  CWndDmm::cClr );
 }
 
 void CWndDmm::OnTick(bool force) 
