@@ -1,5 +1,5 @@
-#ifndef __MENUMODE_H__
-#define __MENUMODE_H__
+#ifndef __DMM_MEAS_H__
+#define __DMM_MEAS_H__
 
 #include <Source/Core/Controls.h>
 #include <Source/Core/ListItems.h>
@@ -7,15 +7,18 @@
 #include <Source/Gui/Oscilloscope/Controls/GraphOsc.h>
 
 #include "ItemMode.h"
-#include "ListMode.h"
+#include "ItemMeas.h"
+#include "ListMeas.h"
 
-class CWndMenuMode : public CWnd
+class CWndDmmMeas : public CWnd
 {
 public:
 	// Menu items
-	CItemMode			m_itmMeas[3];
+	CProviderEnum		m_proDmmModes;
+	CItemMode			m_itmMode;
+	CItemDmmMeas		m_itmMeas[3];
 	
-	CWndListMode		m_wndListMeas;
+	CWndListDmmMeas		m_wndListMeas;
 
 	virtual void		Create(CWnd *pParent, ui16 dwFlags);
 	virtual void		OnMessage(CWnd* pSender, ui16 code, ui32 data);

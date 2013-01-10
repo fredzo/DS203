@@ -1,18 +1,22 @@
-#include "MenuMode.h"
+#include "DmmMeas.h"
 
 #include <Source/Gui/MainWnd.h>
 #include <math.h>
 #include <Source/Gui/Oscilloscope/Meas/Statistics.h>
 
-/*virtual*/ void CWndMenuMode::Create(CWnd *pParent, ui16 dwFlags) 
+/*virtual*/ void CWndDmmMeas::Create(CWnd *pParent, ui16 dwFlags) 
 {
 	CWnd::Create("CWndMenuMeas", dwFlags | CWnd::WsListener, CRect(320-CWndMenuItem::MarginLeft, 20, 400, 240), pParent);
+	m_proDmmModes.Create( (const char**)CSettings::DmmSettings::ppszTextDmmMode,
+		(NATIVEENUM*)&Settings.Dmm.Mode, CSettings::DmmSettings::_ModeMax );
+	m_itmMode.Create("Mode", RGB565(808080), &m_proDmmModes, this);
+
 	m_itmMeas[0].Create( &Settings.DmmMeas[0], this );
 	m_itmMeas[1].Create( &Settings.DmmMeas[1], this );
 	m_itmMeas[2].Create( &Settings.DmmMeas[2], this );
 }
 
-/*virtual*/ void CWndMenuMode::OnMessage(CWnd* pSender, ui16 code, ui32 data)
+/*virtual*/ void CWndDmmMeas::OnMessage(CWnd* pSender, ui16 code, ui32 data)
 {
 	// LAYOUT ENABLE/DISABLE FROM TOP MENU BAR
 	if (code == ToWord('L', 'D') )
@@ -74,7 +78,7 @@ CSettings::Measure::ESource convertSource(CSettings::DmmMeasure::ESource dmmSour
 }
 
 
-void CWndMenuMode::_UpdateAll()
+void CWndDmmMeas::_UpdateAll()
 {
 	CMeasStatistics m_Stat;
 	// TODO autorange here

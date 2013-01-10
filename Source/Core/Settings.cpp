@@ -70,6 +70,7 @@ CSettings* CSettings::m_pInstance = NULL;
 		{ "Minimum", "Maximum", "Average", "RMS", "RectAvg", "Vpp", "Freq", "Period", "FormFact", "Sigma", "Variance", "Baud" };
 /*static*/ const char* const CSettings::DmmMeasure::ppszTextSuffix[] =
 		{ "V", "V", "V", "V", "V", "V", "kHz", "ms", "", "", "", "" };
+/*static*/ const char* const CSettings::DmmSettings::ppszTextDmmMode[] = {"V-AC", "V-DC", "Cont."};
 
 /*static*/ const char* const CSettings::MathOperator::ppszTextType[] = 
 		{"Off", "A", "B", "C", "A+B+C", "A-B+C", "B-A+C", "(A>B)+C", "(A<B)+C", "min(A,B)", "max(A,B)", "Fir(A)+C", "F(A)/B+C"};
@@ -255,6 +256,8 @@ void CSettings::Reset()
 	DmmMeas[2].Source = DmmMeasure::_CH1;
 	DmmMeas[2].Type = DmmMeasure::_Max;
 	DmmMeas[2].fValue = 0;
+
+	Dmm.Mode = DmmSettings::_VAC;
 
 	MathA.nConstant = 0;
 	MathA.nScale = 100;

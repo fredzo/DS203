@@ -59,7 +59,7 @@ public:
 	CWndMenuCalibration	m_wndCalibration;
 
 	CWndDmm				m_wndDmm;
-	CWndMenuMode		m_wndMenuMode;
+	CWndDmmMeas			m_wndDmmMeas;
 
 	CWndMenuSpectMain	m_wndSpectrumMain;
 	CWndMenuSpectMarker	m_wndSpectrumMarker;

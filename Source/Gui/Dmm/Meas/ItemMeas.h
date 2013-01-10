@@ -1,7 +1,7 @@
-#ifndef __MENUITEMMODE_H__
-#define __MENUITEMMODE_H__
+#ifndef __DMMITEMMEAS_H__
+#define __DMMITEMMEAS_H__
 
-class CItemMode : public CWndMenuItem
+class CItemDmmMeas : public CWndMenuItem
 {
 public:
 	CSettings::DmmMeasure* m_pMeas;

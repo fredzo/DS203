@@ -1,7 +1,7 @@
-#ifndef __LISTMODE_H__
-#define __LISTMODE_H__
+#ifndef __DMMLISTMEAS_H__
+#define __DMMLISTMEAS_H__
 
-class CWndListMode : public CListBox
+class CWndListDmmMeas : public CListBox
 {
 public:
 	CSettings::DmmMeasure* m_pMeas;

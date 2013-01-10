@@ -2,7 +2,7 @@
 #define __DMM_H__
 
 #include <Source/Framework/Wnd.h>
-#include <Source/Gui/Dmm/Mode/MenuMode.h>
+#include <Source/Gui/Dmm/Meas/DmmMeas.h>
 
 
 class CWndDmm : public CWnd

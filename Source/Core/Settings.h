@@ -6,7 +6,7 @@
 #include <Source/HwLayer/Bios.h>
 #include "Serialize.h"
 
-#define _VERSION ToDword('D', 'S', 'C', 11)
+#define _VERSION ToDword('D', 'S', 'C', 12)
 
 class CSettings : public CSerialize
 {
@@ -256,6 +256,26 @@ public:
 			return *this;
 		}
 	};
+	class DmmSettings : public CSerialize 
+	{
+	public:
+		static const char* const ppszTextDmmMode[];
+		// = {"V-AC", "V-DC, "Cont."};
+
+		enum { _VAC, _VDC, _CONT, _ModeMax = _CONT }
+			Mode;
+
+		virtual CSerialize& operator <<( CStream& stream )
+		{
+			stream << _E(Mode);
+			return *this;
+		}
+		virtual CSerialize& operator >>( CStream& stream )
+		{
+			stream >> _E(Mode);
+			return *this;
+		}
+	};
 	class MathOperand : public CSerialize
 	{
 	public:
@@ -447,6 +467,7 @@ public:
 	Marker		MarkY2;
 	Measure		Meas[6];
 	DmmMeasure 	DmmMeas[3];
+	DmmSettings	Dmm;
 
 	MathOperand MathA;
 	MathOperand MathB;

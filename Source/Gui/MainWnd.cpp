@@ -60,7 +60,7 @@ void CMainWnd::Create()
 	m_wndModuleSel.Create(this, WsHidden );
 	m_wndCalibration.Create( this, WsHidden );
 
-	m_wndMenuMode.Create(this, WsHidden);
+	m_wndDmmMeas.Create(this, WsHidden);
 	m_wndDmm.Create( this, WsHidden | WsNoActivate );
 
 

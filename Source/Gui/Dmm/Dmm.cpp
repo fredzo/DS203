@@ -251,6 +251,7 @@ void CWndDmm::UpdateBargraphDisplay()
 	BIOS::LCD::Bar( x-7, y-8, x-5, y-2,  m_bargraphPositive ? CWndDmm::cOn : CWndDmm::cClr);
 	BIOS::LCD::Bar( x-9, y-6, x-3, y-4,  CWndDmm::cOn );
 	// Bargraph
+	BIOS::LCD::Bar( x+m_currentBargraph+1, y-12, x+302, y-4,  CWndDmm::cClr );
 	for(int i=0; i <= m_currentBargraph ; i++, x++)
 	{
 		if (i%150 == 0)
@@ -274,7 +275,6 @@ void CWndDmm::UpdateBargraphDisplay()
 			BIOS::LCD::Bar( x-1, y-8, x, y-4,  CWndDmm::cOn );
 		}
 	}
-	BIOS::LCD::Bar( CWndDmm::cBargraphLeft+m_currentBargraph+1, y-12, CWndDmm::cBargraphLeft+302, y-4,  CWndDmm::cClr );
 }
 
 void CWndDmm::OnTick(bool force) 
