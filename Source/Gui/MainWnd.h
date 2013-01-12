@@ -17,6 +17,7 @@
 #include "Calibration/Calibration.h"
 #include "Dmm/Dmm.h"
 #include "Spectrum/Spectrum.h"
+#include "Mouse.h"
 
 #define ADD_MODULE( strName, type )
 #include "User/_Modules.h"
@@ -28,6 +29,7 @@ public:
 	static CMainWnd	*m_pInstance;
 
 public:
+	CMouse					m_Mouse;
 	CWndToolBar			m_wndToolBar;
 	CWndOscGraph		m_wndGraph;
 	CWndSigGraph		m_wndSignalGraph;
@@ -56,6 +58,7 @@ public:
 	CWndAboutFirmware	m_wndAboutFirmware;
 	CWndAboutDevice		m_wndAboutDevice;
 	CWndAboutStatus		m_wndAboutStatus;
+	CWndAboutModules	m_wndAboutModules;
 	CWndMenuCalibration	m_wndCalibration;
 
 	CWndDmm				m_wndDmm;
@@ -76,12 +79,13 @@ public:
 #include "User/_Modules.h"
 #undef ADD_MODULE
 
-	void Create();
-	virtual void OnPaint();
-	virtual void OnMessage(CWnd* pSender, ui16 code, ui32 data);
-	void OnTimer();
-	virtual void WindowMessage(int nMsg, int nParam =0);
-	bool HasOverlay();
+	void				Create();
+	virtual void		OnPaint();
+	virtual void		OnMessage(CWnd* pSender, ui16 code, ui32 data);
+	virtual void		OnTimer();
+	virtual void		WindowMessage(int nMsg, int nParam =0);
+	bool				HasOverlay();
+	void				OnMouseClick();
 
 private:
 	// auto trigger
@@ -90,9 +94,9 @@ private:
 	bool				m_bSleeping;
 
 private:
-	void SdkDiskProc();
-	void SdkUartProc();
-	void CallShortcut(int nShortcut);
+	void				SdkDiskProc();
+	void				SdkUartProc();
+	void				CallShortcut(int nShortcut);
 };
 
 #endif

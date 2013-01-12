@@ -32,6 +32,7 @@ public:
 		static void SetBacklight(int nLevel); // 0..100
 		static void SetVolume(int nLevel); // 0..100
 		static void Execute( int nCode );
+		static void* IdentifyApplication( int nCode );
 		static void Set( int nKey, int nValue );
 		static int Get( int nKey, int nSub = 0 );
 		static int GetTemperature();
@@ -200,6 +201,20 @@ public:
 		static ui32 GetDisplayType();
 		static ui32 GetSerialNumber();
 		static void DrawLogo(int x, int y);
+	};
+
+	class MOUSE
+	{
+	public:
+		enum {
+			Click = 1,
+			DbClick = 2
+		};
+	public:
+		static bool IsSupported();
+		static int GetX();
+		static int GetY();
+		static bool GetDown();
 	};
 };
 

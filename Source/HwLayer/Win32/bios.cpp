@@ -834,3 +834,32 @@ const void* BIOS::LCD::GetCharRom()
 {
 	return (void*)font;
 }
+
+bool BIOS::MOUSE::IsSupported()
+{
+	return true;
+}
+
+int BIOS::MOUSE::GetX()
+{
+	return DEVICE->mousex;
+}
+
+int BIOS::MOUSE::GetY()
+{
+	return DEVICE->mousey;
+}
+
+bool BIOS::MOUSE::GetDown()
+{
+	int nm = DEVICE->moused;
+	DEVICE->moused = 0;
+	return nm ? true : false;
+}
+
+void* BIOS::SYS::IdentifyApplication( int nCode )
+{
+	if ( nCode == BIOS::SYS::EApp1 )
+		return "DSO_APP: Gabonator's alternative UI;Alter UI;Gabriel Valky 2013;";
+	return NULL;
+}
