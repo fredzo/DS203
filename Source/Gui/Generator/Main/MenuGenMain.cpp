@@ -38,19 +38,27 @@ bool _IsVisible(CWnd& wnd)
 		m_itmAmpl.SetAmplitude( Settings.Gen.nScale / (float)0x10000 * 2.0f );
 		m_itmOffset.SetOffset( Settings.Gen.nOffset / (float)0x10000 * 2.0f );
 
-		bool bShowAmpl = ( Settings.Gen.Wave != CSettings::Generator::_Dc );
-		if ( m_itmAmpl.IsVisible() != bShowAmpl )
-		{
-			m_itmAmpl.ShowWindow( bShowAmpl ? CWnd::SwShow : CWnd::SwHide );
-			MainWnd.Invalidate();
-		}
+		bool bShowFreq = ( Settings.Gen.Wave != CSettings::Generator::_Dc );
+		m_itmFreq.ShowWindow( bShowFreq );
+
+		bool bShowOffset = ( Settings.Gen.Wave != CSettings::Generator::_Square );
+		m_itmOffset.ShowWindow( bShowOffset ? CWnd::SwShow : CWnd::SwHide );
+
+		bool bShowAmpl = ( Settings.Gen.Wave != CSettings::Generator::_Dc ) && bShowOffset;
+		m_itmAmpl.ShowWindow( bShowAmpl ? CWnd::SwShow : CWnd::SwHide );
+
+		bool bShowDuty = ( Settings.Gen.Wave == CSettings::Generator::_Square );
+		m_itmDuty.ShowWindow( bShowDuty ? CWnd::SwShow : CWnd::SwHide );
 
 		MainWnd.m_wndSignalGraph.ShowWindow( SwShow );
 		if ( Settings.Gen.Wave == CSettings::Generator::_Dc )
 			MainWnd.m_wndSignalGraph.Setup( NULL, 0 );
 		else if ( Settings.Gen.Wave == CSettings::Generator::_Square )
+		{
+			CCoreGenerator::SetDuty( Settings.Gen.nDuty );
 			MainWnd.m_wndSignalGraph.Setup( CCoreGenerator::GetWave(Settings.Gen.Wave)->pWave, 
 				CCoreGenerator::GetWave(Settings.Gen.Wave)->nCount );
+		}
 		else
 			MainWnd.m_wndSignalGraph.Setup( CCoreGenerator::GetRamDac(), CCoreGenerator::GetRamLen() );
 		return;
@@ -60,7 +68,13 @@ bool _IsVisible(CWnd& wnd)
 	{
 		bool bRedraw = false;
 		CCoreGenerator::Update();
-		m_itmFreq.Invalidate();
+
+		bool bShowFreq = ( Settings.Gen.Wave != CSettings::Generator::_Dc );
+		if ( _IsVisible(m_itmFreq) != bShowFreq )
+		{
+			m_itmFreq.ShowWindow( bShowFreq ? CWnd::SwShow : CWnd::SwHide );
+			bRedraw = true;
+		}
 
 		bool bShowOffset = ( Settings.Gen.Wave != CSettings::Generator::_Square );
 		if ( _IsVisible(m_itmOffset) != bShowOffset )
@@ -91,8 +105,14 @@ bool _IsVisible(CWnd& wnd)
 		else
 			MainWnd.m_wndSignalGraph.Setup( CCoreGenerator::GetRamDac(), CCoreGenerator::GetRamLen() );
 
+		if ( Settings.Gen.Wave == CSettings::Generator::_Square )
+		{
+			CCoreGenerator::SetDuty( Settings.Gen.nDuty );
+		}
 		if ( bRedraw )
 			MainWnd.Invalidate();
+		else
+			m_itmFreq.Invalidate();
 	}
 
 	if ( code == ToWord('i', 'u') && pSender == &m_itmFreq )
