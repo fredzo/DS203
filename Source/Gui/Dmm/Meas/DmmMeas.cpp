@@ -9,11 +9,14 @@
 	CWnd::Create("CWndMenuMeas", dwFlags | CWnd::WsListener, CRect(320-CWndMenuItem::MarginLeft, 20, 400, 240), pParent);
 	m_proDmmModes.Create( (const char**)CSettings::DmmSettings::ppszTextDmmMode,
 		(NATIVEENUM*)&Settings.Dmm.Mode, CSettings::DmmSettings::_ModeMax );
-	m_itmMode.Create("Mode", RGB565(808080), &m_proDmmModes, this);
+	m_itmMode.Create(NULL, RGB565(808080), &m_proDmmModes, this);
 
-	m_itmMeas[0].Create( &Settings.DmmMeas[0], this );
-	m_itmMeas[1].Create( &Settings.DmmMeas[1], this );
-	m_itmMeas[2].Create( &Settings.DmmMeas[2], this );
+	m_itmMeas[0].Create( &Settings.DmmMeas[0], this, CShapes::m );
+	m_itmMeas[1].Create( &Settings.DmmMeas[1], this, CShapes::one );
+	m_itmMeas[2].Create( &Settings.DmmMeas[2], this, CShapes::two );
+
+	m_itmRange.Create(CItemParam::_Range, RGB565(808080), &m_proDmmModes, this);
+	m_itmTime.Create(CItemParam::_Time, RGB565(808080), &m_proDmmModes, this);
 }
 
 /*virtual*/ void CWndDmmMeas::OnMessage(CWnd* pSender, ui16 code, ui32 data)
@@ -103,7 +106,6 @@ void CWndDmmMeas::_UpdateAll()
 				nLastRange = CSettings::Measure::_View;
 			}
 			
-			float fPrev = meas.fValue;
 			meas.fValue = -1;
 			switch ( meas.Type )
 			{
@@ -123,8 +125,6 @@ void CWndDmmMeas::_UpdateAll()
 				default:
 					_ASSERT( !!!"Unknown measurement type" );
 			}
-			if ( fPrev != meas.fValue )
-				m_itmMeas[i].OnPaint(false);
 		}
 	}
 }

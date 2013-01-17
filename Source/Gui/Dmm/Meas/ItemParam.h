@@ -1,16 +1,21 @@
-#ifndef __MENUITEMMODE_H__
-#define __MENUITEMMODE_H__
+#ifndef __MENUITEMPARAM_H__
+#define __MENUITEMPARAM_H__
 
-class CItemMode : public CWndMenuItem
+class CItemParam : public CWndMenuItem
 {
+public:
+	enum ParamType { _Range, _Time};
+
 protected:
 	CValueProvider* m_pProvider;
+	ParamType m_paramType;
 
 public:
-	void Create(const char* pszId, ui16 clr, CValueProvider* pProvider, CWnd* pParent)
+	void Create(ParamType paramType, ui16 clr, CValueProvider* pProvider, CWnd* pParent)
 	{
 		m_pProvider = pProvider;
-		CWndMenuItem::Create( pszId, clr, 1, pParent);
+		m_paramType = paramType;
+		CWndMenuItem::Create( NULL, clr, 1, pParent);
 	}
 
 	virtual void OnPaint()
@@ -22,7 +27,14 @@ public:
 		{
 			x -= 2;
 		}
-		x += BIOS::LCD::Draw(x, y+4, RGB565(000000), RGBTRANS, CShapes::dmm_mode);
+		switch(m_paramType) {
+			case _Range: 
+				x += BIOS::LCD::Draw(x, y+4, RGB565(000000), RGBTRANS, CShapes::dmm_range);
+				break;
+			case _Time: 
+				x += BIOS::LCD::Draw(x, y+4, RGB565(000000), RGBTRANS, CShapes::dmm_time);
+				break;
+		}
 		x++;
 		if ( HasFocus() )
 		{
@@ -37,19 +49,6 @@ public:
 			x+=4;
 			CRect rcRect(x, y, x + m_pProvider->GetWidth(), y + 14);
 			m_pProvider->OnPaint( rcRect, HasFocus() );
-			x = rcRect.right;
-			x+=4;
-		}
-		switch(m_pProvider->Get()) {
-			case CSettings::DmmSettings::_VAC: 
-				BIOS::LCD::Draw(x, y+4, RGB565(000000), RGBTRANS, CShapes::dmm_vac);
-				break;
-			case CSettings::DmmSettings::_VDC: 
-				BIOS::LCD::Draw(x, y+4, RGB565(000000), RGBTRANS, CShapes::dmm_vdc);
-				break;
-			case CSettings::DmmSettings::_CONT: 
-				BIOS::LCD::Draw(x-2, y+4, RGB565(000000), RGBTRANS, CShapes::dmm_cont);
-				break;
 		}
 	}
 

@@ -7,6 +7,7 @@
 #include <Source/Gui/Oscilloscope/Controls/GraphOsc.h>
 
 #include "ItemMode.h"
+#include "ItemParam.h"
 #include "ItemMeas.h"
 #include "ListMeas.h"
 
@@ -17,6 +18,8 @@ public:
 	CProviderEnum		m_proDmmModes;
 	CItemMode			m_itmMode;
 	CItemDmmMeas		m_itmMeas[3];
+	CItemParam			m_itmRange;
+	CItemParam			m_itmTime;
 	
 	CWndListDmmMeas		m_wndListMeas;
 

@@ -42,6 +42,15 @@ public:
 	static const char markerX[];
 	static const char triangle[];
 	static const char check[];
+	static const char dmm_mode[];
+	static const char dmm_range[];
+	static const char dmm_time[];
+	static const char m[];
+	static const char one[];
+	static const char two[];
+	static const char dmm_vac[];
+	static const char dmm_vdc[];
+	static const char dmm_cont[];
 	//static char RamTest[];
 };
 

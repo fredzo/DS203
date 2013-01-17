@@ -98,6 +98,7 @@
     <ClInclude Include="..\..\Source\Gui\Dmm\Dmm.h" />
     <ClInclude Include="..\..\Source\Gui\Dmm\Meas\ItemMeas.h" />
     <ClInclude Include="..\..\Source\Gui\Dmm\Meas\ItemMode.h" />
+    <ClInclude Include="..\..\Source\Gui\Dmm\Meas\ItemParam.h" />
     <ClInclude Include="..\..\Source\Gui\Dmm\Meas\ListMeas.h" />
     <ClInclude Include="..\..\Source\Gui\Dmm\Meas\DmmMeas.h" />
     <ClInclude Include="..\..\Source\Gui\Generator\Controls\GraphSig.h" />

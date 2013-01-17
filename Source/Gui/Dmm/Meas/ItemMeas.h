@@ -6,14 +6,14 @@ class CItemDmmMeas : public CWndMenuItem
 public:
 	CSettings::DmmMeasure* m_pMeas;
 	ui16	m_color;
+	const char*   m_pShape;
 
 public:
 
-	void OnPaint(bool updateBg) 
+	virtual void OnPaint() 
 	{
 		bool bEnabled = m_pMeas->Enabled == CSettings::DmmMeasure::_On;
 		ui16 clr = bEnabled ? RGB565(000000) : RGB565(808080);
-		ui16 clr2 = RGB565(404040);
 
 		switch ( m_pMeas->Source )
 		{
@@ -21,55 +21,38 @@ public:
 		case CSettings::DmmMeasure::_CH2: m_color = Settings.CH2.u16Color; break;
 		}
 		
-		int x = m_rcClient.left + 10 + MarginLeft;
+		int x = m_rcClient.left + 2 + MarginLeft;
 		int y = m_rcClient.top;
-		if(updateBg) 
+		if ( HasFocus() )
 		{
-			CWndMenuItem::OnPaint();
-			BIOS::LCD::Print( x, y, clr, RGBTRANS, CSettings::DmmMeasure::ppszTextType[ (int)m_pMeas->Type ] );
+			x -= 2;
+		}
+		CWndMenuItem::OnPaint();
+		x += BIOS::LCD::Draw(x, y+4, RGB565(000000), RGBTRANS, m_pShape);
+		if ( HasFocus() )
+		{
+			x += BIOS::LCD::Draw(x, y, RGB565(000000), RGBTRANS, CShapes::sel_left);
+			CRect rcRect(x, y, x + ((ui16)strlen(CSettings::DmmMeasure::ppszTextType[ (int)m_pMeas->Type ]) << 3), y + 14);
+			BIOS::LCD::Bar( rcRect, RGB565(0000000) );
+			BIOS::LCD::Print( x, y, RGB565(FFFFFF), RGBTRANS, CSettings::DmmMeasure::ppszTextType[ (int)m_pMeas->Type ] );
+			x = rcRect.right;
+			x += BIOS::LCD::Draw(x, y, RGB565(000000), RGBTRANS, CShapes::sel_right);
 		}
 		else
 		{
-			CWndMenuItem::ClearValueBottomBg();
-		}
-
-		if ( bEnabled )
-		{
-			y += 16;
-			char str[16];
-			const char* suffix = CSettings::DmmMeasure::ppszTextSuffix[ (int)m_pMeas->Type ];
-			float fValue = m_pMeas->fValue;
-			if ( fValue < 0 )
-			{
-				x += BIOS::LCD::Draw( x, y, clr, RGBTRANS, CShapes::minus);
-				fValue = -fValue;
-			} else
-				x += 6;
-
-			BIOS::DBG::sprintf(str, "%3f", fValue);
-		
-			while ( strlen(str) + strlen(suffix) > 7 )
-				str[strlen(str)-1] = 0;
-		
-			x += BIOS::LCD::Print( x, y, clr, RGBTRANS, str );
-			x += 4;
-			if ( suffix && *suffix )
-				BIOS::LCD::Print( x, y, clr2, RGBTRANS, suffix );
+			x+=3;
+			BIOS::LCD::Print( x, y, clr, RGBTRANS, CSettings::DmmMeasure::ppszTextType[ (int)m_pMeas->Type ] );
 		}
 	}
 
-	virtual void Create(CSettings::DmmMeasure* pMeas, CWnd *pParent) 
+	virtual void Create(CSettings::DmmMeasure* pMeas, CWnd *pParent, const char* shape) 
 	{
 		_ASSERT( pMeas );
 		m_pMeas = pMeas;
 		m_color = Settings.CH1.u16Color;
-		CWndMenuItem::Create( NULL, RGB565(000000), 2, pParent);
+		m_pShape = shape;
+		CWndMenuItem::Create( NULL, RGB565(000000), 1, pParent);
 		CWndMenuItem::SetColorPtr( &m_color );
-	}
-
-	virtual void OnPaint()
-	{
-		OnPaint(true);
 	}
 
 	virtual void OnKey(ui16 nKey)
