@@ -134,7 +134,12 @@ void BIOS::SYS::Execute( int nCode )
 	__MSR_MSP(dwGotoAddr);
 	GotoApp();
 #else
-	__MSR_MSP(dwGotoAddr+4);
+
+  u32 *vector_table = (u32 *) dwGotoAddr;
+  __MSR_MSP(vector_table[0]);
+  ((void (*)(void)) vector_table[1])();
+
+//	__MSR_MSP(dwGotoAddr+4);
 //__set_MSP(dwGotoAddr+4);
 #endif
 }
@@ -158,6 +163,24 @@ void* BIOS::SYS::IdentifyApplication( int nCode )
 		if ( *pData == ToDword('D', 'S', 'O', '_') )
 			return pData;
 	}
+
+	pData = (ui32*)dwGotoAddr;
+	ui32 dwStack = pData[0];
+	ui32 dwEntry = pData[1];
+	ui32 dwHandler1 = pData[2]; // NMIException
+	ui32 dwHandler2 = pData[3]; // HardFaultException
+
+	if ( (dwStack & 0xff0000ff) == 0x20000000 &&
+		dwEntry > dwGotoAddr &&
+		dwEntry < dwStack &&
+		dwHandler1 > dwGotoAddr &&
+		dwHandler1 < dwStack &&
+		dwHandler2 > dwGotoAddr &&
+		dwHandler2 < dwStack )
+	{
+		return (void*)"Unknown";
+	}
+
 	return NULL;
 }
 
