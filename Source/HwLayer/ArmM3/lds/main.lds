@@ -58,14 +58,20 @@ SECTIONS
     .bios 0x08004200 (NOLOAD) : {
       BIOS.o
     }
+/*
+    .cbiosram : {
+			cbios.o(.data .bss .bss.*)
+		} >BIOSRAM
 
-
-    
+    .cbiosrom : {
+			cbios.o(.text)
+		} >BIOSROM 
+*/ 
     /* the program code is stored in the .text section, which goes to Flash */
     .text :
     {
 	    . = ALIGN(4);
-
+	    _scode = .;
       *(.text .text.* .gnu.linkonce.t.*)
     	*(.plt)
     	*(.gnu.warning)
@@ -73,7 +79,7 @@ SECTIONS
 
     	*(.ARM.extab* .gnu.linkonce.armextab.*)
     	*(.gcc_except_table)
-	   
+	    _ecode = .;
     } >ROM
  
     .eh_frame_hdr : ALIGN (4)
@@ -147,6 +153,12 @@ SECTIONS
     } >EXTRA
 */
 
+/*
+    .cbios : {
+	    . = ALIGN(4);
+		  cbios.o
+    } >BIOSRAM
+*/
     .entry : {
 	    . = ALIGN(4);
       _vectors = .;
@@ -189,7 +201,7 @@ SECTIONS
         *(.shbss)
 		*(.bss .bss.* .gnu.linkonce.b.*)
 		*(COMMON)
-        
+      
 	    . = ALIGN(4);
 	    /* This is used by the startup in order to initialize the .bss secion */
    	 	_ebss = . ;

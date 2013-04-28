@@ -17,3 +17,12 @@ extern "C" {
 #include "../bios/serial.h"
 #include "../bios/ver.h"
 #include "../bios/mouse.h"
+#include "../bios/gpio.h"
+#ifdef _VERSION2
+#include "../bios/flash.h"
+#include "../bios/fat.h"
+#endif
+
+extern "C" {
+#include "../bios/crash.h"
+}

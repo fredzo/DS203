@@ -4,6 +4,7 @@
 /*static*/ const CWndToolBar::CBarItem* CWndToolBar::GetMenuItems()
 {
 	static const CBarItem arrMenuItems[] = {
+
 		{ CBarItem::IMain,	(PSTR)"Oscilloscope", &MainWnd.m_wndModuleSel},
 		{ CBarItem::ISub,	(PSTR)"Input", &MainWnd.m_wndMenuInput},
 		{ CBarItem::ISub,	(PSTR)"Cursor", &MainWnd.m_wndMenuCursor},
@@ -36,7 +37,7 @@
 		{ CBarItem::IMain,	(PSTR)"User app", &MainWnd.m_wndModuleSel},
 
 #		define ADD_MODULE( strName, type ) { CBarItem::ISub, (PSTR)strName, &MainWnd.m_wndUser##type },
-#		include "User/_Modules.h"
+#		include <Source/User/_Modules.h>
 #		undef ADD_MODULE
 
 		{ CBarItem::IMain,	(PSTR)"Dmm", &MainWnd.m_wndModuleSel},
@@ -210,8 +211,13 @@
 	{
 		const CBarItem *pItems = GetMenuItems();
 		m_nFocus = (ui8)data;
+		CWnd* pFocus = GetFocus();
 		SendMessage( GetParent(), ToWord('L', 'E'), (NATIVEPTR)pItems[m_nFocus].m_pWndMenu );
-		SetFocus();
+		if ( GetFocus() == pFocus )
+		{
+			// else the focus was stolen by the current wnd
+			SetFocus();
+		}
 	}
 
 	if ( code == ToWord('g', 'o') )

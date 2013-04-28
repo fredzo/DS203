@@ -478,7 +478,7 @@ BOOL bADCReady = FALSE;
 	long lTick = GetTickCount();
 	if (lLast == 0)
 		lLast = GetTickCount();
-	bADCReady = (GetTickCount()-lLast) > 100;
+	bADCReady = (GetTickCount()-lLast) > 20;
 	if (bADCReady)
 		lLast = lTick;
 	return bADCReady;
@@ -490,12 +490,48 @@ BOOL bADCReady = FALSE;
 	if (lCounter == 4096)
 		lCounter = 0;
 
-	FLOAT fa = 0.035f + (GetTickCount()%20000)/20000.0f*0.04f;
-	fa = lCounter*0.0001f;
-	FLOAT a = cos(lCounter*(fa)*10)*0.8f+0.2f;
-	FLOAT b = sin(lCounter*0.011f+1)*0.5f;
+	FLOAT a, b;
+
+	switch (3)
+	{
+	case 1:
+		{
+			FLOAT fm = (sin(GetTickCount()*0.001f)+1.0f)*0.5f;
+			if ( fm < 0.5)
+				fm = 0.8f-0.7f*fm;
+			else
+				fm = 0;
+			FLOAT fa = 0.035f + (GetTickCount()%20000)/20000.0f*0.14f;
+			a = cos(lCounter*(fa)*10)*(fm)+0.2f;
+			b = sin(lCounter*0.011f+1)*0.5f;
+
+			break;
+
+		}
+
+	case 2:
+		{
+			FLOAT fm = 1;
+			FLOAT fa = 0.035f;// + (GetTickCount()%20000)/20000.0f*0.14f;
+			a = cos(lCounter*(fa)*10)*(fm)+0.2f;
+			b = sin(lCounter*0.011f+1)*0.5f;
+			break;
+		}
+
+	case 3:
+		{
+			a = 0;
+			b = 0;
+			float t = -pow(abs(cos(GetTickCount()*0.001f)),50);
+			a = t/3;
+			break;
+		}
+	}
+	//fa = lCounter*0.0001f;
 	unsigned long da = (ui32)((a+1.0f)*127);
 	unsigned long db = (ui32)((b+1.0f)*127);
+	da = max(0, min(da, 255));
+	db = max(0, min(db, 255));
 	da |= rand()&3;
 	lCounter++;
 	return da | (db<<8);
@@ -611,6 +647,7 @@ void BIOS::SYS::Beep(int)
 
 /*static*/ void BIOS::DBG::Print(const char * format, ...)
 {
+	_ASSERT( format );
 	static int px = 0;
 	static int py = 0;
 
@@ -864,6 +901,243 @@ void* BIOS::SYS::IdentifyApplication( int nCode )
 	return NULL;
 }
 
-/*static*/ void BIOS::SYS::Execute( int nCode )
+/*static*/ int BIOS::SYS::Execute( int nCode )
 {
+	return 0;
+}
+
+/*static*/ ui32* BIOS::GPIO::GetRegister(int nPort, int nReg)
+{
+	static ui32 dummy;
+	return &dummy;
+}
+
+/*static*/ void BIOS::GPIO::SetState(int nPort, int nPin, int nState)
+{
+}
+
+/*static*/ void BIOS::GPIO::SetPin(int nPort, int nPin, bool bOn)
+{
+}
+
+/*static*/ bool BIOS::GPIO::GetPin(int nPort, int nPin)
+{
+	return false;
+}
+
+#ifdef _VERSION2
+
+/*static*/ bool BIOS::MEMORY::PageWrite(int nPage, const ui8* pBuffer)
+{
+	return true;
+}
+
+/*static*/ bool BIOS::MEMORY::PageRead(int nPage, ui8* pBuffer)
+{
+	return true;
+}
+
+/*static*/ bool BIOS::MEMORY::PageErase(int nPage)
+{
+	return true;
+}
+
+/*static*/ void BIOS::MEMORY::LinearStart()
+{
+}
+
+/*static*/ bool BIOS::MEMORY::LinearFinish()
+{
+	return true;
+}
+
+/*static*/ bool BIOS::MEMORY::LinearProgram( ui32 nAddress, unsigned char* pData, int nLength )
+{
+	return true;
+}
+
+
+
+/*
+	class FAT
+	{
+	public:
+		enum EResult 
+		{
+			EOk,
+			EDiskError,
+			EIntError,
+			ENoFile,
+			ENoPath,
+			EDiskFull
+		};
+
+		struct TFindFile
+		{
+			ui32 nFileLength;		
+			ui16 nDate;
+			ui16 nTime;
+			ui8 nAtrib;
+			char strName[13];
+		};
+
+		static EResult Init();
+		static EResult Open(const char* strName, ui8 nIoMode);
+		static EResult Read(ui8* pSectorData);
+		static EResult Write(ui8* pSectorData);
+		static EResult Close(int nSize = -1);
+	
+		static EResult OpenDir(char* strPath);
+		static EResult FindNext(TFindFile* pFile);
+	};
+*/
+
+/*static*/ BIOS::FAT::EResult BIOS::FAT::Init()
+{
+	return BIOS::FAT::EOk;
+}
+
+bool bResetFind = true;
+HANDLE hFindFile = NULL;
+char strFind[128];
+
+/*static*/ BIOS::FAT::EResult BIOS::FAT::OpenDir(char* strPath)
+{
+	strcpy(strFind, strPath);
+	char *strFound = NULL;
+	while ( (strFound=strstr(strFind, "/")) != NULL )
+		*strFound = '\\';
+	if (strFind[0] != 0)
+		strcat(strFind, "\\");
+	strcat(strFind, "*.*");
+	bResetFind = true;
+	return BIOS::FAT::EOk;
+}
+
+/*static*/ BIOS::FAT::EResult BIOS::FAT::FindNext(TFindFile* pFile)
+{
+	WIN32_FIND_DATA FindFileData;
+
+	if ( bResetFind )
+	{
+		bResetFind = false;
+		hFindFile = FindFirstFile(strFind, &FindFileData);
+	} else
+	{
+		if (!FindNextFile(hFindFile, &FindFileData) )
+		{
+			FindClose(hFindFile);
+			return BIOS::FAT::ENoFile;
+		}
+	}
+
+	if ( FindFileData.dwFileAttributes != FILE_ATTRIBUTE_DIRECTORY )
+		pFile->nAtrib = BIOS::FAT::EArchive; // AM_ARC
+	else
+		pFile->nAtrib = BIOS::FAT::EDirectory; // AM_ARC
+
+	pFile->nFileLength = FindFileData.nFileSizeLow;
+	char strName[128] = {0};
+	strcpy(strName, FindFileData.cFileName);
+	strName[12] = 0;
+	memcpy(pFile->strName, strName, 13);
+	
+	SYSTEMTIME sysTime;
+	FileTimeToSystemTime( &FindFileData.ftCreationTime, &sysTime );
+
+	pFile->nDate =  ((DWORD)(sysTime.wYear - 1980) << 9) | ((DWORD)sysTime.wMonth << 5) | ((DWORD)sysTime.wDay << 0);
+	pFile->nTime =  ((DWORD)sysTime.wHour << 11) | ((DWORD)sysTime.wMinute << 5) | ((DWORD)sysTime.wSecond >> 1);
+
+	if (!hFindFile)
+	{
+		FindClose(hFindFile);
+		return BIOS::FAT::ENoFile;
+	}
+	return BIOS::FAT::EOk;
+}
+
+FILEINFO fatFile;
+/*static*/ BIOS::FAT::EResult BIOS::FAT::Open(const char* strName, ui8 nIoMode)
+{
+	if ( nIoMode == BIOS::DSK::IoRead )
+		fatFile.f = fopen(strName, "rb");
+	if ( nIoMode == BIOS::DSK::IoWrite )
+		fatFile.f = fopen(strName, "wb");
+	fatFile.nSectors = 0;
+	int e = GetLastError();
+	return (fatFile.f != NULL && fatFile.f != INVALID_HANDLE_VALUE) ? BIOS::FAT::EOk : BIOS::FAT::EIntError;
+}
+
+/*static*/ BIOS::FAT::EResult BIOS::FAT::Seek(ui32 lOffset)
+{
+	fseek( fatFile.f, lOffset, SEEK_SET );
+	return BIOS::FAT::EOk;
+}
+
+/*static*/ BIOS::FAT::EResult BIOS::FAT::Read(ui8* pSectorData)
+{
+	return BIOS::DSK::Read(&fatFile, pSectorData) ? BIOS::FAT::EOk : BIOS::FAT::EIntError;
+}
+
+/*static*/ BIOS::FAT::EResult BIOS::FAT::Write(ui8* pSectorData)
+{
+	return BIOS::DSK::Write(&fatFile, pSectorData) ? BIOS::FAT::EOk : BIOS::FAT::EIntError;
+}
+
+/*static*/ BIOS::FAT::EResult BIOS::FAT::Close(int nSize /*= -1*/)
+{
+	return BIOS::DSK::Close(&fatFile, nSize) ? BIOS::FAT::EOk : BIOS::FAT::EIntError;
+}
+
+/*static*/ ui32 BIOS::FAT::GetFileSize()
+{
+	fseek( fatFile.f, 0, SEEK_END );
+	// get the file size
+	int nSize= ftell( fatFile.f );
+	rewind(fatFile.f);
+	return nSize;
+}
+#endif
+
+bool BIOS::SYS::IsColdBoot()
+{
+	return true;
+}
+
+/*static*/ char* BIOS::SYS::GetSharedBuffer()
+{
+	static char buf[4096];
+	return buf;
+}
+
+/*static*/ int BIOS::SYS::GetSharedLength()
+{
+	return 4096;
+}
+
+void NullFunction()
+{
+}
+
+/*static*/ ui32 BIOS::SYS::GetProcAddress( const char* strFuncName )
+{
+	#define EXPORT(f, decl) if ( strcmp( strFuncName, #f ) == 0 ) return (NATIVEPTR)(decl)&f;
+	#define EXPORT_ALIAS(al, f, decl) if ( strcmp( strFuncName, #al ) == 0 ) return (NATIVEPTR)(decl)&f;
+	EXPORT(BIOS::LCD::PutPixel, void (*)(int, int, ui16));
+	EXPORT(BIOS::LCD::Print, int (*)(int, int, ui16, ui16, const char*));
+	EXPORT(BIOS::KEY::GetKeys, ui16 (*)());	
+	EXPORT(BIOS::SYS::Execute, void (*)(int));	
+	EXPORT(BIOS::LCD::Printf, int (*)(int x, int y, unsigned short clrf, unsigned short clrb, const char * format, ...));
+
+	EXPORT_ALIAS(PutPixel, BIOS::LCD::PutPixel, void (*)(int, int, ui16));
+	EXPORT_ALIAS(Print, BIOS::LCD::Print, int (*)(int, int, ui16, ui16, const char*));
+	EXPORT_ALIAS(GetKeys, BIOS::KEY::GetKeys, ui16 (*)());	
+	EXPORT_ALIAS(Execute, BIOS::SYS::Execute, void (*)(int));	
+	EXPORT_ALIAS(Printf, BIOS::LCD::Printf, int (*)(int x, int y, unsigned short clrf, unsigned short clrb, const char * format, ...));
+
+	EXPORT_ALIAS(gBiosInit, NullFunction, void (*)());
+	EXPORT_ALIAS(gBiosExit, NullFunction, void (*)());
+
+	#undef EXPORT
+	return NULL;
 }

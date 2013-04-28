@@ -18,10 +18,12 @@ LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 
 #include <crtdbg.h>
 #include <Source/HwLayer/Win32/device.h>
+#include <Source/Framework/Application.h>
 
+CApplication myApp;
 CDevice *CDevice::m_pInstance = NULL;
 CDevice g_dev;
-CApplication g_app;
+CApplicationProto* g_app = &myApp;
 
 HWND g_hwnd = NULL;
 BOOL g_running = FALSE;
@@ -47,11 +49,11 @@ DWORD WINAPI ThreadProcApp(HANDLE handle)
 	while ( !g_hwnd )
 		Sleep( 10 );
 
-	g_app.Create();
+	g_app->Create();
 	while (g_running) 
 	{
 		g_dev();
-		g_app();	// contains sleep(1);
+		(*g_app)();	// contains sleep(1);
 	}
 	return 0;
 }

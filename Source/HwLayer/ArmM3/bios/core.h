@@ -1,16 +1,18 @@
 #ifndef AQW
 #define AQW
 
+int __errno; // required by math.h
+
 extern vu32 vu32Tick;
 extern vu16 Delay_Cnt;
 extern vu16 Beep_mS;
 int m_nBeepVolume = 50;
+int m_nColdBoot = -1;
 
 /*static*/ ui32 BIOS::SYS::GetTick()
 {
 	return vu32Tick;
 }
-
 
 void BIOS::SYS::Standby( bool bEnterSleep )
 {
@@ -33,8 +35,13 @@ void BIOS::SYS::Standby( bool bEnterSleep )
 
 /*static*/ void BIOS::SYS::Init()
 {
-	SYS::DelayMs(500);
-	LCD::Init();
+	if ( BIOS::SYS::IsColdBoot() )
+	{
+		SYS::DelayMs(500);
+		LCD::Init();
+		BIOS::DBG::sprintf( (char*)BIOS::SYS::GetSharedBuffer(),
+			"gaboui=1;biosproc=0x%08x;", &BIOS::SYS::GetProcAddress);
+	}
 	ADC::Init();
 	SERIAL::Init();
 }
@@ -110,7 +117,7 @@ void Assert(const char*msg, int n)
 #define SYS_BASE ((u32)(0x08004000)) // Size = 32KB
 #define DFU_BASE ((u32)(0x08000000)) // Size = 16KB 
 
-void BIOS::SYS::Execute( int nCode )
+int BIOS::SYS::Execute( int nCode )
 {
 	u32 dwGotoAddr = 0;
 	switch ( nCode )
@@ -121,27 +128,18 @@ void BIOS::SYS::Execute( int nCode )
 		case BIOS::SYS::EApp4: dwGotoAddr = APP4_BASE; break;
 		case BIOS::SYS::ESys: dwGotoAddr = SYS_BASE; break;
 		case BIOS::SYS::EDfu: dwGotoAddr = DFU_BASE; break;
+		default:
+			nCode |= 1; // THUMB instruction
+			return ((int (*)(void)) nCode)();
 	}
-	// what about interrupt handlers? NVIC?
+
 	if ( !dwGotoAddr )
-		return;
-
-#if 0
-	u32 dwGotoBase = *(vu32*)(dwGotoAddr/*+4*/);
-	typedef void (*pFunc)(void);
-	pFunc GotoApp = (pFunc)(dwGotoBase);
-
-	__MSR_MSP(dwGotoAddr);
-	GotoApp();
-#else
+		return 0;
 
   u32 *vector_table = (u32 *) dwGotoAddr;
   __MSR_MSP(vector_table[0]);
   ((void (*)(void)) vector_table[1])();
-
-//	__MSR_MSP(dwGotoAddr+4);
-//__set_MSP(dwGotoAddr+4);
-#endif
+	return 1;
 }
 
 void* BIOS::SYS::IdentifyApplication( int nCode )
@@ -340,6 +338,75 @@ int BIOS::SYS::GetCoreVoltage()
 
 	int ADCConvertedValue = ADC_GetConversionValue(ADC1);
   return ADCConvertedValue;
+}
+
+void _BiosInit()
+{
+	BIOS::DBG::Print("BiosInit!");
+}
+
+void _BiosExit()
+{
+	BIOS::SYS::Execute(0);
+}
+
+ui32 BIOS::SYS::GetProcAddress(const char* strFuncName )
+{
+
+	#define EXPORT(f, decl) if ( strcmp( strFuncName, #f ) == 0 ) return (NATIVEPTR)(decl)&f;
+	EXPORT(BIOS::LCD::PutPixel, void (*)(int, int, ui16));
+	EXPORT(BIOS::LCD::Print, int (*)(int, int, ui16, ui16, const char*));
+	EXPORT(BIOS::KEY::GetKeys, ui16 (*)());	
+	EXPORT(BIOS::SYS::Execute, void (*)(int));	
+	EXPORT(BIOS::LCD::Printf, int (*)(int x, int y, unsigned short clrf, unsigned short clrb, const char * format, ...));
+
+	EXPORT(NVIC_SetVectorTable, void (*)(ui32, ui32));
+	EXPORT(__USB_Init, void (*)(void));
+	EXPORT(__USB_Istr, void (*)(void));
+	EXPORT(__CTR_HP, void (*)(void));
+
+	#define EXPORT_ALIAS(al, f, decl) if ( strcmp( strFuncName, #al ) == 0 ) return (NATIVEPTR)(decl)&f;
+	EXPORT_ALIAS(PutPixel, BIOS::LCD::PutPixel, void (*)(int, int, ui16));
+	EXPORT_ALIAS(Print, BIOS::LCD::Print, int (*)(int, int, ui16, ui16, const char*));
+	EXPORT_ALIAS(GetKeys, BIOS::KEY::GetKeys, ui16 (*)());	
+	EXPORT_ALIAS(Execute, BIOS::SYS::Execute, void (*)(int));	
+	EXPORT_ALIAS(Printf, BIOS::LCD::Printf, int (*)(int x, int y, unsigned short clrf, unsigned short clrb, const char * format, ...));
+
+	EXPORT_ALIAS(gBiosInit, _BiosInit, void (*)());
+	EXPORT_ALIAS(gBiosExit, _BiosExit, void (*)());
+
+
+	EXPORT(BIOS::SYS::GetTick, ui32 (*)());
+	EXPORT(BIOS::KEY::GetKeys, ui16 (*)());
+	EXPORT(BIOS::LCD::Pattern, void (*)(int, int, int, int, const ui16*, int));
+	EXPORT(BIOS::SYS::Beep, void (*)(int));
+
+	#undef EXPORT
+	return NULL;
+}
+
+bool BIOS::SYS::IsColdBoot()
+{
+	// jpa's alterbios begins at 0x20001800
+	// original bios begins at 0x20000000 and takes 1396 bytes
+  // 0x20000800..0x20001800 can be used by applications
+	if ( m_nColdBoot == -1 )
+	{
+		ui32* pData = (ui32*)0x200017f0; 
+		m_nColdBoot = *pData == 0x6ab08a70 ? 0 : 1;
+		*pData = 0x6ab08a70;
+	}
+	return m_nColdBoot ? true : false;
+}
+
+char* BIOS::SYS::GetSharedBuffer()
+{
+	return (char*)0x20000800;
+}
+
+int BIOS::SYS::GetSharedLength()
+{
+	return 0x200017f0 - 0x20000800;
 }
 
 #endif

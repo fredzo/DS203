@@ -1,7 +1,6 @@
 #include "GraphOsc.h"
 #include <Source/Gui/MainWnd.h>
 
-
 CWndOscGraph::CWndOscGraph()
 {
 	ClearAverage();
@@ -130,7 +129,7 @@ ui16 CWndOscGraph::_Interpolate( ui16 clrA, ui16 clrB )
 
 void CWndOscGraph::OnPaintXY()
 {
-	if ( CWnd::m_rcOverlay.IsValid() )
+	if ( CWnd::GetOverlay().IsValid() )
 	{
 		return;
 	}
@@ -169,9 +168,11 @@ void CWndOscGraph::OnPaintXY()
 		return;
 	}
 
+	
 	for (ui16 x=0; x<nColMax; x++, nIndex++)
 	{
 		ui32 ui32Sample = nIndex < nMaxIndex ?  BIOS::ADC::GetAt(nIndex) : 0;
+		
 		int nSampleY2 = 0, nSampleY1 = 0;
 
 		if ( bEnabled1 )
@@ -199,14 +200,12 @@ void CWndOscGraph::OnPaintXY()
 		else
 			BIOS::LCD::PutPixel( m_rcClient.left + nSampleY2 + BlkX, m_rcClient.bottom - nSampleY1, clrPoint );
 	}
-
 }
 
-LINKERSECTION(".extra")
 void CWndOscGraph::OnPaintTY()
 {
 	ui16 column[CWndGraph::DivsY*CWndGraph::BlkY];
-	if ( !CWnd::m_rcOverlay.IsValid() /*&& m_bNeedRedraw*/ )
+	if ( !CWnd::GetOverlay().IsValid() /*&& m_bNeedRedraw*/ )
 	{
 		CRect rc = m_rcClient;
 		rc.Inflate( 1, 1, 1, 1 );
@@ -230,14 +229,14 @@ void CWndOscGraph::OnPaintTY()
 	if (!bTrigger)
 		nTriggerTime = -1;
 
-	int nCut = CWnd::m_rcOverlay.IsValid() ? CWnd::m_rcOverlay.left - m_rcClient.left : m_rcClient.Width();
-	int nCutTop = CWnd::m_rcOverlay.IsValid() ? CWnd::m_rcOverlay.bottom - m_rcClient.top : 0;
+	int nCut = CWnd::GetOverlay().IsValid() ? CWnd::GetOverlay().left - m_rcClient.left : m_rcClient.Width();
+	int nCutTop = CWnd::GetOverlay().IsValid() ? CWnd::GetOverlay().bottom - m_rcClient.top : 0;
 	if ( nCutTop >= m_rcClient.Height() )
 		nCut = m_rcClient.Width();
-	int nFirstTop = CWnd::m_rcOverlay.IsValid() ? CWnd::m_rcOverlay.top - m_rcClient.top : 0;
+	int nFirstTop = CWnd::GetOverlay().IsValid() ? CWnd::GetOverlay().top - m_rcClient.top : 0;
 
 	int nMax = m_rcClient.Width(); 
-	if ( CWnd::m_rcOverlay.IsValid() && CWnd::m_rcOverlay.left - m_rcClient.left <= 0 )
+	if ( CWnd::GetOverlay().IsValid() && CWnd::GetOverlay().left - m_rcClient.left <= 0 )
 		return;
 
 	CSettings::Calibrator::FastCalc Ch1fast, Ch2fast;
@@ -307,8 +306,8 @@ void CWndOscGraph::OnPaintTY()
 	}
 
 	ui16 clrm = Settings.Math.uiColor;
-
 	int nIndex = Settings.Time.Shift;
+
 	for (ui16 x=0; x<nMax; x++, nIndex++)
 	{
 		int clrCol = (nTriggerTime != x) ? 0x0101 : 0x00;
@@ -373,7 +372,7 @@ void CWndOscGraph::OnPaintTY()
 		}
 
 		BIOS::ADC::SSample Sample;
-		Sample.nValue = nIndex < nMaxIndex ?  BIOS::ADC::GetAt(nIndex) : 0;
+		Sample.nValue = nIndex < nMaxIndex ? BIOS::ADC::GetAt(nIndex) : 0;
 
 		if ( en1 )
 		{

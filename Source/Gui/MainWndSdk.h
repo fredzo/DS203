@@ -142,6 +142,8 @@ public:
 	}
 };
 
+
+
 void CMainWnd::SdkUartProc()
 {
 	static char buffer[128];

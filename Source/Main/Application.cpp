@@ -1,6 +1,13 @@
 #include "Application.h"
 #include <Source/Gui/MainWnd.h>
 
+CApplicationProto::CApplicationProto() {}
+CApplicationProto::~CApplicationProto() {}
+void CApplicationProto::Create() {}
+void CApplicationProto::Destroy() {}
+bool CApplicationProto::operator ()() { return false; }
+
+
 /*static*/ CApplication* CApplication::m_pInstance = NULL;
 
 class CKeyProcessor
@@ -69,7 +76,9 @@ CApplication::~CApplication()
 void CApplication::Create()
 {
 	BIOS::SYS::Init();
-
+#ifdef _VERSION2
+	BIOS::FAT::Init();
+#endif
 	GLOBAL.m_wndMain.Create();
 	GLOBAL.m_wndMain.WindowMessage( CWnd::WmPaint );
 
@@ -78,6 +87,10 @@ void CApplication::Create()
 	CCoreGenerator::Update();
 
 	BIOS::ADC::Restart();
+}
+
+void CApplication::Destroy()
+{
 }
 
 bool CApplication::operator ()()
@@ -105,11 +118,10 @@ bool CApplication::operator ()()
 
 	if ( nKeys )
 	{
-		GLOBAL.m_wndMain.WindowMessage( CWnd::WmKey, nKeys );
 		if ( nKeys != lLastKeys && Settings.Runtime.m_Beep == CSettings::CRuntime::_On ) 
-		{
 			BIOS::SYS::Beep(50);
-		}
+
+		GLOBAL.m_wndMain.WindowMessage( CWnd::WmKey, nKeys );
 		lLastKeys = nKeys;
 	}
 

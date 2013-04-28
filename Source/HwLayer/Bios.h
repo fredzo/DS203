@@ -4,19 +4,19 @@
 #include <Source/Framework/Classes.h>
 #include "Types.h"
 
-class BIOS {
+class DLLAPI BIOS {
 public:
-	class DBG {
+	class DLLAPI DBG {
 	public:
 		static void Print (const char* format, ...);
 		// move to utils?
 		static int sprintf(char* buf, const char * format, ...);
 	};
 
-	class SYS {
+	class DLLAPI SYS {
 	public:
 		enum {
-			EApp1,
+			EApp1 = 0,
 			EApp2,
 			EApp3,
 			EApp4,
@@ -31,16 +31,21 @@ public:
 		static int GetBattery();
 		static void SetBacklight(int nLevel); // 0..100
 		static void SetVolume(int nLevel); // 0..100
-		static void Execute( int nCode );
+		static int Execute( int nCode );
 		static void* IdentifyApplication( int nCode );
 		static void Set( int nKey, int nValue );
 		static int Get( int nKey, int nSub = 0 );
 		static int GetTemperature();
 		static int GetCoreVoltage();
 		static void Standby( bool bEnterSleep );
+
+		static ui32 GetProcAddress( const char* strFunction );
+		static bool IsColdBoot();
+		static char* GetSharedBuffer();
+		static int GetSharedLength();
 	};
 
-	class LCD {
+	class DLLAPI LCD {
 	public:
 		enum {
 			// Screen resolution
@@ -86,7 +91,7 @@ public:
 		static const void* GetCharRom();
 	};
 
-	class KEY {
+	class DLLAPI KEY {
 	public:
 		enum {
 			// Key definitions
@@ -106,7 +111,7 @@ public:
 		static ui16 GetKeys();
 	};
 
-	class ADC {
+	class DLLAPI ADC {
 	public:
 		typedef unsigned long TSample;
 		union SSample {
@@ -127,6 +132,11 @@ public:
 			Start = 0,
 			Empty = 1,
 			Full = 2
+		};
+		
+		enum {
+			Length = 4096,
+			BufferLength = Length*4
 		};
 
 	public:
@@ -152,7 +162,7 @@ public:
 		static TSample& GetAt(int i);
 	};
 
-	class GEN {
+	class DLLAPI GEN {
 	public:
 		enum
 			{
@@ -167,7 +177,7 @@ public:
 		static void ConfigureDc(ui16 nData);
 	};
 
-	class DSK {
+	class DLLAPI DSK {
 	public:
 		enum {
 			IoRead = 1,
@@ -181,7 +191,7 @@ public:
 		static BOOL Close(FILEINFO* pFileInfo, int nSize = -1);
 	};
 
-	class SERIAL
+	class DLLAPI SERIAL
 	{
 	public:
 		static void Init();
@@ -191,7 +201,7 @@ public:
 		static void Putch(char ch);
 	};
 
-	class VER
+	class DLLAPI VER
 	{
 	public:
 		static const char* GetHardwareVersion();
@@ -203,7 +213,7 @@ public:
 		static void DrawLogo(int x, int y);
 	};
 
-	class MOUSE
+	class DLLAPI MOUSE
 	{
 	public:
 		enum {
@@ -216,6 +226,108 @@ public:
 		static int GetY();
 		static bool GetDown();
 	};
-};
 
+	class DLLAPI GPIO
+	{
+	public:
+		enum {
+			// nPort
+			PortA = 0,
+			PortB = 1,
+			PortC = 2,
+			PortD = 3,
+
+			// nReg
+			RegCrl = 0,
+			RegCrh = 1,
+			RegIdr = 2,
+			RegOdr = 3,
+			RegBsrr = 4,
+			RegBrr = 5,
+			RegLckr = 6,
+			
+			// nState
+			StateInput = 0,           // ..00
+			StateOutput10Mhz = 1,     // ..01
+			StateOutput2Mhz = 2,      // ..10
+			StateOutput50Mhz = 3,     // ..11
+
+			StateInputAnalog = 0<<2,
+			StateInputFloating = 1<<2,
+			StateInputPull = 2<<2,
+
+			StateOutputPushPull = 0<<2,
+			StateOutputOpenDrain = 1<<2,
+			StateOutputFunctionPushPull = 2<<2,
+			StateOutputFunctionOpenDrain = 3<<2,
+			
+			// macros for easy use
+			StateSimpleInput = StateInput | StateInputFloating,
+			StateSimpleOutput = StateOutput2Mhz | StateOutputPushPull
+		};
+
+	public:
+		static ui32* GetRegister(int nPort, int nReg);
+		static void SetState(int nPort, int nPin, int nState);
+		static void SetPin(int nPort, int nPin, bool bOn);
+		static bool GetPin(int nPort, int nPin);
+	};
+
+#ifdef _VERSION2	
+	class DLLAPI MEMORY
+	{
+	public:
+		static bool PageWrite(int nPage, const ui8* pBuffer);
+		static bool PageRead(int nPage, ui8* pBuffer);
+		static bool PageErase(int nPage);
+
+		static void LinearStart();
+		static bool LinearFinish();
+		static bool LinearProgram( ui32 nAddress, unsigned char* pData, int nLength );
+	};
+
+	class DLLAPI FAT
+	{
+	public:
+		enum EResult 
+		{
+			EOk,
+			EDiskError,
+			EIntError,
+			ENoFile,
+			ENoPath,
+			EDiskFull
+		};
+
+		enum EAttribute 
+		{
+			EReadOnly = 1,
+			EHidden = 2,
+			ESystem = 4,
+			EDirectory = 0x10,
+			EArchive = 0x20
+		};
+
+		struct TFindFile
+		{
+			ui32 nFileLength;		
+			ui16 nDate;
+			ui16 nTime;
+			ui8 nAtrib;
+			char strName[13];
+		};
+
+		static EResult Init();
+		static EResult Open(const char* strName, ui8 nIoMode);
+		static EResult Read(ui8* pSectorData);
+		static EResult Write(ui8* pSectorData);
+		static EResult Seek(ui32 lOffset);
+		static EResult Close(int nSize = -1);
+		static ui32 GetFileSize();
+	
+		static EResult OpenDir(char* strPath);
+		static EResult FindNext(TFindFile* pFile);
+	};
+#endif
+};
 #endif

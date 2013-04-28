@@ -4,6 +4,7 @@
 #define MainWnd (*CMainWnd::m_pInstance)
 
 #include "Toolbar.h"
+#include "Oscilloscope/Core/CoreOscilloscope.h"
 #include "Oscilloscope/Oscilloscope.h"
 #include "Windows/WndConfirm.h"
 #include "Windows/MessageBox.h"
@@ -19,8 +20,10 @@
 #include "Spectrum/Spectrum.h"
 #include "Mouse.h"
 
+bool HasOverlay();
+
 #define ADD_MODULE( strName, type )
-#include "User/_Modules.h"
+#include <Source/User/_Modules.h>
 #undef ADD_MODULE
 
 class CMainWnd : public CWnd
@@ -54,7 +57,6 @@ public:
 	CWndOscInfo			m_wndInfoBar;
 	CWndLevelReferences	m_wndLReferences;
 	CWndTimeReferences	m_wndTReferences;
-	CWndScreenSaver		m_wndScreenSaver;
 	CWndAboutFirmware	m_wndAboutFirmware;
 	CWndAboutDevice		m_wndAboutDevice;
 	CWndAboutStatus		m_wndAboutStatus;
@@ -76,7 +78,7 @@ public:
 	CWndManager			m_wndManager;
 
 #define ADD_MODULE( strName, type ) type m_wndUser##type;
-#include "User/_Modules.h"
+#include <Source/User/_Modules.h>
 #undef ADD_MODULE
 
 	void				Create();
@@ -86,6 +88,7 @@ public:
 	virtual void		WindowMessage(int nMsg, int nParam =0);
 	bool				HasOverlay();
 	void				OnMouseClick();
+	void				Resample();
 
 private:
 	// auto trigger

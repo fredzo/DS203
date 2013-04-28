@@ -1,7 +1,7 @@
 #ifndef __CLASSES_H__
 #define __CLASSES_H__
 
-class CPoint {
+class DLLAPI CPoint {
 public:
 	// RAM optimization int->short
 	short x, y;
@@ -18,7 +18,7 @@ public:
 	}
 };
 
-class CRect {
+class DLLAPI CRect {
 public:
 	CRect()
 	{
@@ -79,7 +79,7 @@ public:
 		bottom = 0;
 	}
 
-	bool IsValid()
+	bool IsValid() const
 	{
 		return right > left;
 	}
@@ -119,11 +119,14 @@ public:
 };
 
 template <class TYPE>
-class CArray
+class DLLAPI CArray
 {
 	TYPE	*m_arrElements;
 	ui16	m_nCount;
 	ui16	m_nMaxCount;
+
+	typedef int (*TCompareFunction)(TYPE&, TYPE&);
+
 public:
 	CArray()
 	{
@@ -179,6 +182,11 @@ public:
 		return m_nCount;
 	}
 
+	int GetMaxSize()
+	{
+		return m_nMaxCount;
+	}
+
 	void SetSize( int nSize )
 	{
 		m_nCount = nSize;
@@ -214,6 +222,18 @@ public:
 	void RemoveAll()
 	{
 		m_nCount = 0;
+	}
+
+	void Sort(TCompareFunction fCompare)
+	{
+		for ( int i=0; i<m_nCount; i++)
+			for ( int j=i+1; j<m_nCount; j++)
+				if ( fCompare( m_arrElements[i], m_arrElements[j] ) < 0 ) 
+				{
+					TYPE tTemp = m_arrElements[i];
+					m_arrElements[i] = m_arrElements[j];
+					m_arrElements[j] = tTemp;
+				}
 	}
 };
 

@@ -2,6 +2,8 @@
 #define __UTILS_H__
 
 #include <Source/HwLayer/Types.h>
+#include <math.h>
+#include <stdint.h>
 
 #define UTILS CUtils()
 
@@ -9,6 +11,7 @@ class CUtils
 {
 public:
 	static int atoi(char *str);
+	static ui32 htoi(char *str);
 	static char* itoa(si16 i);
 	static char* itoa2(ui8 n);
 	static char* ftoa(float f);

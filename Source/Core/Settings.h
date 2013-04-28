@@ -33,6 +33,7 @@ public:
 
 		static const float pfValueProbe[];
 		static const float pfValueResolution[];
+		
 
 		ui16 u16Color;
 		si16 u16Position;
@@ -93,6 +94,7 @@ public:
 			Range;
 
 		static const float pfValueResolution[];
+		static const int pfValueResolutionCorrection[]; // florian
 
 		si16 Shift;
 		int InvalidFirst;
@@ -434,6 +436,7 @@ public:
 
 		int m_bUartTest;
 		int m_bUartEcho;	// not saved in settings
+		int m_bUartSdk;
 
 		virtual CSerialize& operator <<( CStream& stream )
 		{

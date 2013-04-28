@@ -1,13 +1,14 @@
 #include "Wnd.h"
 
-/*static*/ CWnd* 									CWnd::m_pTop = NULL;
-/*static*/ ui16 									CWnd::m_nInstances = 0;
-/*static*/ CWnd* 									CWnd::m_pFocus = NULL;
+/*static*/ CWnd* 							CWnd::m_pTop = NULL;
+/*static*/ ui16 							CWnd::m_nInstances = 0;
+/*static*/ CWnd* 							CWnd::m_pFocus = NULL;
 /*static*/ CWnd::CTimer 					CWnd::m_arrTimers_[16];
-/*static*/ CArray<CWnd::CTimer> 	CWnd::m_arrTimers;
+/*static*/ CArray<CWnd::CTimer> 			CWnd::m_arrTimers;
 /*static*/ CWnd::CModal						CWnd::m_arrModals_[8];
-/*static*/ CArray<CWnd::CModal> 	CWnd::m_arrModals;
-/*static*/ CRect 									CWnd::m_rcOverlay;
+/*static*/ CArray<CWnd::CModal> 			CWnd::m_arrModals;
+/*static*/ CRect 							CWnd::m_rcOverlay;
+/*static*/ CRect 							CWnd::m_rcOverlayStack;
 
 CWnd::CWnd()
 {
@@ -254,7 +255,8 @@ void CWnd::Invalidate()
 {
 	// TODO: we should only mark this windows and redraw it a while later, but for keeping
 	// things simple, invalidate causes window to redraw
-	WindowMessage(WmPaint);
+	if ( m_dwFlags & CWnd::WsVisible )	// the window must be visible, should we check this by using IsVisible()?
+		WindowMessage(WmPaint);
 }
 
 void CWnd::SendMessage(CWnd* pTarget, ui16 code, ui32 data)
@@ -311,11 +313,15 @@ CWnd* CWnd::_GetLastActiveWindow()
 {
 	CWnd* pWnd = this;
 	CWnd* pWndLast = NULL;
-	for ( int i = 0; i < 14 && pWnd; i++ )
+	int i;
+	for ( i = 0; i < 14 && pWnd; i++ )
 	{
 		pWndLast = pWnd;
 		pWnd = pWnd->_GetNextActiveWindow();
 	}
+	// when there is only child, make it accessible only by pressing down button (for file manager and single window modules)
+	if ( i == 2 && pWndLast->m_pFirst == NULL )
+		return NULL;
 	return pWndLast;
 }
 
@@ -355,6 +361,7 @@ void CWnd::_UpdateTimers()
 		CTimer& timer = m_arrTimers[i];
 		if ( /*(si32)(nTick - timer.m_nLast)*/ nTick > timer.m_nNext )
 		{
+			// enable resident timers ?
 			_ASSERT( timer.m_pWnd->m_dwFlags & CWnd::WsVisible );
 			timer.m_pWnd->OnTimer();
 			timer.m_nNext = BIOS::SYS::GetTick() + timer.m_nInterval;
@@ -409,3 +416,27 @@ void CWnd::StopModal()
 	m_rcOverlay = m_arrModals.GetLast().m_rcPrevOverlay;
 	m_arrModals.RemoveLast();
 }
+
+const CRect& CWnd::GetOverlay()
+{
+	return m_rcOverlay;
+}
+
+const CWnd::CModal& CWnd::GetTopModal()
+{
+	return CWnd::m_arrModals.GetLast();
+}
+
+void CWnd::PushOverlay()
+{
+	_ASSERT( !m_rcOverlayStack.IsValid() );
+	m_rcOverlayStack = m_rcOverlay;
+	m_rcOverlay.Invalidate();
+}
+
+void CWnd::PopOverlay()
+{
+	_ASSERT( m_rcOverlayStack.IsValid() );
+	m_rcOverlay = m_rcOverlayStack;
+}
+
