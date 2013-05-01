@@ -29,19 +29,21 @@ public:
 		}
 		CWndMenuItem::OnPaint();
 		x += BIOS::LCD::Draw(x, y+4, RGB565(000000), RGBTRANS, m_pShape);
+		const char* label = CSettings::getTypeText(Settings.Dmm.Mode)[ (int)m_pMeas->Type ];
 		if ( HasFocus() )
 		{
 			x += BIOS::LCD::Draw(x, y, RGB565(000000), RGBTRANS, CShapes::sel_left);
-			CRect rcRect(x, y, x + ((ui16)strlen(CSettings::DmmMeasure::ppszTextType[ (int)m_pMeas->Type ]) << 3), y + 14);
+			
+			CRect rcRect(x, y, x + ((ui16)strlen(label) << 3), y + 14);
 			BIOS::LCD::Bar( rcRect, RGB565(0000000) );
-			BIOS::LCD::Print( x, y, RGB565(FFFFFF), RGBTRANS, CSettings::DmmMeasure::ppszTextType[ (int)m_pMeas->Type ] );
+			BIOS::LCD::Print( x, y, RGB565(FFFFFF), RGBTRANS, label );
 			x = rcRect.right;
 			x += BIOS::LCD::Draw(x, y, RGB565(000000), RGBTRANS, CShapes::sel_right);
 		}
 		else
 		{
 			x+=3;
-			BIOS::LCD::Print( x, y, clr, RGBTRANS, CSettings::DmmMeasure::ppszTextType[ (int)m_pMeas->Type ] );
+			BIOS::LCD::Print( x, y, clr, RGBTRANS, label );
 		}
 	}
 
@@ -55,6 +57,12 @@ public:
 		CWndMenuItem::SetColorPtr( &m_color );
 	}
 
+	void Update(CSettings::DmmMeasure* pMeas)
+	{
+		_ASSERT( pMeas );
+		m_pMeas = pMeas;
+	}
+
 	virtual void OnKey(ui16 nKey)
 	{
 		_ASSERT( m_pMeas );
@@ -64,7 +72,7 @@ public:
 			DecEnum(m_pMeas->Type);
 			Invalidate();
 		}
-		if ( nKey & BIOS::KEY::KeyRight && m_pMeas->Type < CSettings::DmmMeasure::_MaxType )
+		if ( nKey & BIOS::KEY::KeyRight && m_pMeas->Type < CSettings::getTypeMaxEnum(Settings.Dmm.Mode) )
 		{
 			_ASSERT(sizeof(m_pMeas->Type) == sizeof(NATIVEENUM));
 			IncEnum(m_pMeas->Type);

@@ -492,7 +492,7 @@ BOOL bADCReady = FALSE;
 
 	FLOAT a, b;
 
-	switch (3)
+	switch (1)
 	{
 	case 1:
 		{

@@ -42,13 +42,18 @@ public:
 		}
 		switch(m_pProvider->Get()) {
 			case CSettings::DmmSettings::_VAC: 
+			case CSettings::DmmSettings::_mAAC: 
 				BIOS::LCD::Draw(x, y+4, RGB565(000000), RGBTRANS, CShapes::dmm_vac);
 				break;
 			case CSettings::DmmSettings::_VDC: 
+			case CSettings::DmmSettings::_mADC: 
 				BIOS::LCD::Draw(x, y+4, RGB565(000000), RGBTRANS, CShapes::dmm_vdc);
 				break;
 			case CSettings::DmmSettings::_CONT: 
 				BIOS::LCD::Draw(x-2, y+4, RGB565(000000), RGBTRANS, CShapes::dmm_cont);
+				break;
+			case CSettings::DmmSettings::_OHM: 
+				BIOS::LCD::Draw(x-2, y+4, RGB565(000000), RGBTRANS, CShapes::dmm_ohm);
 				break;
 		}
 	}
@@ -59,20 +64,20 @@ public:
 		{
 			(*m_pProvider)--;
 			Invalidate();
-			SendMessage(m_pParent, ToWord('u', 'p'), 0);
+			SendMessage(m_pParent, ToWord('u', 'm'), 0);
 		}
 		if ( nKey & BIOS::KEY::KeyRight && (*m_pProvider)+1 == CValueProvider::Yes )
 		{
 			(*m_pProvider)++;
 			Invalidate();
-			SendMessage(m_pParent, ToWord('u', 'p'), 0);
+			SendMessage(m_pParent, ToWord('u', 'm'), 0);
 		}
 		if ( nKey & BIOS::KEY::KeyEnter  )
 		{
 			// is that provider enumerator ?
 			if ( m_pProvider->Get() !=	CValueProvider::Invalid )
 			{
-				SendMessage(m_pParent, ToWord('l', 'e'), (ui32)(NATIVEPTR)(m_pProvider));
+				SendMessage(m_pParent, ToWord('m', 'e'), (ui32)(NATIVEPTR)(m_pProvider));
 			}
 		}
 		CWndMenuItem::OnKey( nKey );

@@ -460,7 +460,7 @@ SHAPE(two) =
   ".   . ."
   " ...  .";
 
-SHAPE(dmm_vac) =
+SHAPE(dmm_vdc) =
   "\x07"
   "   .  ."
   "   .  ."
@@ -472,7 +472,7 @@ SHAPE(dmm_vac) =
   "   .  ."
   "   .  .";
 
-SHAPE(dmm_vdc) =
+SHAPE(dmm_vac) =
   "\x07"
   "  .   ."
   " .    ."
@@ -503,6 +503,18 @@ SHAPE(dmm_cont) =
   " ..   .. "
   "  .....  ";
 
-
+SHAPE(dmm_ohm) =
+  "\x08"
+  "        "
+  "       ."
+  "  ...  ."
+  " .   ..."
+  ".       "
+  ".       "
+  ".       "
+  " .   ..."
+  "  ...  ."
+  "       ."
+  "        ";
 
 //char CShapes::RamTest[1024*8];

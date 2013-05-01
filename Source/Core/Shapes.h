@@ -51,6 +51,7 @@ public:
 	static const char dmm_vac[];
 	static const char dmm_vdc[];
 	static const char dmm_cont[];
+	static const char dmm_ohm[];
 	//static char RamTest[];
 };
 

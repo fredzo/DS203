@@ -78,11 +78,49 @@ CSettings* CSettings::m_pInstance = NULL;
 		{ "Off", "On" };
 /*static*/ const char* const CSettings::DmmMeasure::ppszTextSource[] =
 		{ "CH1", "CH2" };
-/*static*/ const char* const CSettings::DmmMeasure::ppszTextType[] =
+// VAC
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextTypeVac[] =
 		{ "Minimum", "Maximum", "Average", "RMS", "RectAvg", "Vpp", "Freq", "Period", "FormFact", "Sigma", "Variance", "Baud" };
-/*static*/ const char* const CSettings::DmmMeasure::ppszTextSuffix[] =
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextSuffixVac[] =
 		{ "V", "V", "V", "V", "V", "V", "kHz", "ms", "", "", "", "" };
-/*static*/ const char* const CSettings::DmmSettings::ppszTextDmmMode[] = {"V-AC", "V-DC", "Cont."};
+// VDC
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextTypeVdc[] =
+		{ "Minimum", "Maximum", "Average", "RMS", "RectAvg", "Vpp", "Freq", "Period", "FormFact", "Sigma", "Variance", "Baud" };
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextSuffixVdc[] =
+		{ "V", "V", "V", "V", "V", "V", "kHz", "ms", "", "", "", "" };
+// Cont
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextTypeCont[] =
+		{ "Cont.", "Ohm", "Minimum", "Maximum" };
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextSuffixCont[] =
+		{ "-", "Ohm", "Ohm", "Ohm" };
+// Ohm
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextTypeOhm[] =
+		{ "Ohm", "Minimum", "Maximum" };
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextSuffixOhm[] =
+		{ "Ohm", "Ohm", "Ohm" };
+// AAC
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextTypeAac[] =
+		{ "Minimum", "Maximum", "Average", "RMS", "RectAvg", "App", "Freq", "Period" };
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextSuffixAac[] =
+		{ "mA", "mA", "mA", "mA", "mA", "mA", "kHz", "ms", "", "", "", "" };
+// ADC
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextTypeAdc[] =
+		{ "Minimum", "Maximum", "Average", "RMS", "RectAvg", "App", "Freq", "Period" };
+/*static*/ const char* const CSettings::DmmMeasure::ppszTextSuffixAdc[] =
+		{ "mA", "mA", "mA", "mA", "mA", "mA", "kHz", "ms", "", "", "", "" };
+
+/*static*/ const char* const CSettings::DmmSettings::ppszTextDmmMode[] = 
+		{"V-AC", "V-DC", "Cont.", "Ohm", "~mA-DC", "~mA-AC"};
+/*static*/ const char* const CSettings::DmmSettings::ppszTextDmmRange[] =
+		{"Auto", "50mV", "100mV", "200mV", "500mV", "1V", "2V", "5V", "10V"};
+/*static*/ const char* const CSettings::DmmSettings::ppszTextDmmTime[] =
+		{"Auto", "200ns", "500ns", 
+		"1us", "2us", "5us",
+		"10us", "20us", "50us", "100us", "200us", "500us",
+		"1ms", "2ms", "5ms",
+		"10ms", "20ms", "50ms", "100ms", "200ms", "500ms", 
+		"1s" };
+		
 
 /*static*/ const char* const CSettings::MathOperator::ppszTextType[] = 
 		{"Off", "A", "B", "C", "A+B+C", "A-B+C", "B-A+C", "(A>B)+C", "(A<B)+C", "min(A,B)", "max(A,B)", "Fir(A)+C", "F(A)/B+C"};
@@ -256,20 +294,101 @@ void CSettings::Reset()
 	Meas[5].fValue = 0;
 
 	// DmmMeas
-	DmmMeas[0].Enabled = DmmMeasure::_On;
-	DmmMeas[0].Source = DmmMeasure::_CH1;
-	DmmMeas[0].Type = DmmMeasure::_Rms;
-	DmmMeas[0].fValue = 0;
+	// V-AC
+	DmmMeas[0][0].Enabled = DmmMeasure::_On;
+	DmmMeas[0][0].Source = DmmMeasure::_CH1;
+	DmmMeas[0][0].Type = DmmMeasure::_VacRms;
+	DmmMeas[0][0].fValue = 0;
 
-	DmmMeas[1].Enabled = DmmMeasure::_On;
-	DmmMeas[1].Source = DmmMeasure::_CH1;
-	DmmMeas[1].Type = DmmMeasure::_Min;
-	DmmMeas[1].fValue = 0;
+	DmmMeas[1][0].Enabled = DmmMeasure::_On;
+	DmmMeas[1][0].Source = DmmMeasure::_CH1;
+	DmmMeas[1][0].Type = DmmMeasure::_VacMin;
+	DmmMeas[1][0].fValue = 0;
 
-	DmmMeas[2].Enabled = DmmMeasure::_On;
-	DmmMeas[2].Source = DmmMeasure::_CH1;
-	DmmMeas[2].Type = DmmMeasure::_Max;
-	DmmMeas[2].fValue = 0;
+	DmmMeas[2][0].Enabled = DmmMeasure::_On;
+	DmmMeas[2][0].Source = DmmMeasure::_CH1;
+	DmmMeas[2][0].Type = DmmMeasure::_VacMax;
+	DmmMeas[2][0].fValue = 0;
+
+	// V-DC
+	DmmMeas[0][1].Enabled = DmmMeasure::_On;
+	DmmMeas[0][1].Source = DmmMeasure::_CH1;
+	DmmMeas[0][1].Type = DmmMeasure::_VdcRms;
+	DmmMeas[0][1].fValue = 0;
+
+	DmmMeas[1][1].Enabled = DmmMeasure::_On;
+	DmmMeas[1][1].Source = DmmMeasure::_CH1;
+	DmmMeas[1][1].Type = DmmMeasure::_VdcMin;
+	DmmMeas[1][1].fValue = 0;
+
+	DmmMeas[2][1].Enabled = DmmMeasure::_On;
+	DmmMeas[2][1].Source = DmmMeasure::_CH1;
+	DmmMeas[2][1].Type = DmmMeasure::_VdcMax;
+	DmmMeas[2][1].fValue = 0;
+
+	// Cont
+	DmmMeas[0][2].Enabled = DmmMeasure::_On;
+	DmmMeas[0][2].Source = DmmMeasure::_CH1;
+	DmmMeas[0][2].Type = DmmMeasure::_ContCont;
+	DmmMeas[0][2].fValue = 0;
+
+	DmmMeas[1][2].Enabled = DmmMeasure::_On;
+	DmmMeas[1][2].Source = DmmMeasure::_CH1;
+	DmmMeas[1][2].Type = DmmMeasure::_ContOhm;
+	DmmMeas[1][2].fValue = 0;
+
+	DmmMeas[2][2].Enabled = DmmMeasure::_On;
+	DmmMeas[2][2].Source = DmmMeasure::_CH1;
+	DmmMeas[2][2].Type = DmmMeasure::_ContMax;
+	DmmMeas[2][2].fValue = 0;
+
+	// Ohm
+	DmmMeas[0][3].Enabled = DmmMeasure::_On;
+	DmmMeas[0][3].Source = DmmMeasure::_CH1;
+	DmmMeas[0][3].Type = DmmMeasure::_OhmOhm;
+	DmmMeas[0][3].fValue = 0;
+
+	DmmMeas[1][3].Enabled = DmmMeasure::_On;
+	DmmMeas[1][3].Source = DmmMeasure::_CH1;
+	DmmMeas[1][3].Type = DmmMeasure::_OhmMin;
+	DmmMeas[1][3].fValue = 0;
+
+	DmmMeas[2][3].Enabled = DmmMeasure::_On;
+	DmmMeas[2][3].Source = DmmMeasure::_CH1;
+	DmmMeas[2][3].Type = DmmMeasure::_OhmMax;
+	DmmMeas[2][3].fValue = 0;
+
+	// A-AC
+	DmmMeas[0][4].Enabled = DmmMeasure::_On;
+	DmmMeas[0][4].Source = DmmMeasure::_CH1;
+	DmmMeas[0][4].Type = DmmMeasure::_AacRms;
+	DmmMeas[0][4].fValue = 0;
+
+	DmmMeas[1][4].Enabled = DmmMeasure::_On;
+	DmmMeas[1][4].Source = DmmMeasure::_CH1;
+	DmmMeas[1][4].Type = DmmMeasure::_AacMin;
+	DmmMeas[1][4].fValue = 0;
+
+	DmmMeas[2][4].Enabled = DmmMeasure::_On;
+	DmmMeas[2][4].Source = DmmMeasure::_CH1;
+	DmmMeas[2][4].Type = DmmMeasure::_AacMax;
+	DmmMeas[2][4].fValue = 0;
+
+	// A-DC
+	DmmMeas[0][5].Enabled = DmmMeasure::_On;
+	DmmMeas[0][5].Source = DmmMeasure::_CH1;
+	DmmMeas[0][5].Type = DmmMeasure::_AdcRms;
+	DmmMeas[0][5].fValue = 0;
+
+	DmmMeas[1][5].Enabled = DmmMeasure::_On;
+	DmmMeas[1][5].Source = DmmMeasure::_CH1;
+	DmmMeas[1][5].Type = DmmMeasure::_AdcMin;
+	DmmMeas[1][5].fValue = 0;
+
+	DmmMeas[2][5].Enabled = DmmMeasure::_On;
+	DmmMeas[2][5].Source = DmmMeasure::_CH1;
+	DmmMeas[2][5].Type = DmmMeasure::_AdcMax;
+	DmmMeas[2][5].fValue = 0;
 
 	Dmm.Mode = DmmSettings::_VAC;
 
@@ -333,7 +452,7 @@ ui32 CSettings::GetChecksum()
 	ui8* pSharedBuffer = (ui8*)BIOS::DSK::GetSharedBuffer();
 	memset( pSharedBuffer, 0, FILEINFO::SectorSize );
 
-	CStream bufStream( pSharedBuffer, FILEINFO::SectorSize );
+	CStream bufStream( pSharedBuffer, 2*FILEINFO::SectorSize );
 	bufStream << *this;
 	return bufStream.GetChecksum();
 }
@@ -349,7 +468,7 @@ void CSettings::Save()
 	ui8* pSharedBuffer = (ui8*)BIOS::DSK::GetSharedBuffer();
 	memset( pSharedBuffer, 0, FILEINFO::SectorSize );
 
-	CStream bufStream( pSharedBuffer, FILEINFO::SectorSize );
+	CStream bufStream( pSharedBuffer, 2*FILEINFO::SectorSize );
 	bufStream << *this;
 
 	_ASSERT_VALID( BIOS::DSK::Write(&f, pSharedBuffer) );
@@ -369,7 +488,7 @@ void CSettings::Load()
 
 	_ASSERT_VALID( BIOS::DSK::Read(&f, pSharedBuffer) );
 
-	CStream bufStream( pSharedBuffer, FILEINFO::SectorSize );
+	CStream bufStream( pSharedBuffer, 2*FILEINFO::SectorSize );
 	bufStream >> *this;
 
 	BIOS::DSK::Close(&f);
@@ -528,4 +647,82 @@ ui32 CSettings::GetStaticChecksum()
 		MarkY2.nValue = arrMarkY[1];
 	
 	return bufStream.GetChecksum();
+}
+
+/* static */ const char* const* CSettings::getTypeText(CSettings::DmmSettings::EDmmMode mode) 
+{
+	switch(mode) 
+	{
+	case CSettings::DmmSettings::_VAC:
+		return CSettings::DmmMeasure::ppszTextTypeVac;
+		break;
+	case CSettings::DmmSettings::_VDC:
+		return CSettings::DmmMeasure::ppszTextTypeVdc;
+		break;
+	case CSettings::DmmSettings::_CONT:
+		return CSettings::DmmMeasure::ppszTextTypeCont;
+		break;
+	case CSettings::DmmSettings::_OHM:
+		return CSettings::DmmMeasure::ppszTextTypeOhm;
+		break;
+	case CSettings::DmmSettings::_mAAC:
+		return CSettings::DmmMeasure::ppszTextTypeAac;
+		break;
+	case CSettings::DmmSettings::_mADC:
+	default:
+		return CSettings::DmmMeasure::ppszTextTypeAdc;
+		break;
+	}
+}
+
+/* static */ const char* const* CSettings::getTypeSuffix(CSettings::DmmSettings::EDmmMode mode)
+{
+	switch(mode) 
+	{
+	case CSettings::DmmSettings::_VAC:
+		return CSettings::DmmMeasure::ppszTextSuffixVac;
+		break;
+	case CSettings::DmmSettings::_VDC:
+		return CSettings::DmmMeasure::ppszTextSuffixVdc;
+		break;
+	case CSettings::DmmSettings::_CONT:
+		return CSettings::DmmMeasure::ppszTextSuffixCont;
+		break;
+	case CSettings::DmmSettings::_OHM:
+		return CSettings::DmmMeasure::ppszTextSuffixOhm;
+		break;
+	case CSettings::DmmSettings::_mAAC:
+		return CSettings::DmmMeasure::ppszTextSuffixAac;
+		break;
+	case CSettings::DmmSettings::_mADC:
+	default:
+		return CSettings::DmmMeasure::ppszTextSuffixAdc;
+		break;
+	}
+}
+
+/* static */ NATIVEENUM CSettings::getTypeMaxEnum(CSettings::DmmSettings::EDmmMode mode)
+{
+	switch(mode) 
+	{
+	case CSettings::DmmSettings::_VAC:
+		return CSettings::DmmMeasure::_VacMaxType;
+		break;
+	case CSettings::DmmSettings::_VDC:
+		return CSettings::DmmMeasure::_VdcMaxType;
+		break;
+	case CSettings::DmmSettings::_CONT:
+		return CSettings::DmmMeasure::_ContMaxType;
+		break;
+	case CSettings::DmmSettings::_OHM:
+		return CSettings::DmmMeasure::_OhmMaxType;
+		break;
+	case CSettings::DmmSettings::_mAAC:
+		return CSettings::DmmMeasure::_AacMaxType;
+		break;
+	case CSettings::DmmSettings::_mADC:
+	default:
+		return CSettings::DmmMeasure::_AdcMaxType;
+		break;
+	}
 }

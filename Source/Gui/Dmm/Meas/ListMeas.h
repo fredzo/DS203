@@ -26,8 +26,8 @@ public:
 		m_proSource.Create( (const char**)CSettings::DmmMeasure::ppszTextSource,
 			(NATIVEENUM*)&pMeas->Source, CSettings::DmmMeasure::_MaxSource );
 
-		m_proType.Create( (const char**)CSettings::DmmMeasure::ppszTextType,
-			(NATIVEENUM*)&pMeas->Type, CSettings::DmmMeasure::_MaxType );
+		m_proType.Create( (const char**)CSettings::getTypeText(Settings.Dmm.Mode),
+			(NATIVEENUM*)&pMeas->Type, CSettings::getTypeMaxEnum(Settings.Dmm.Mode) );
 
 		m_itmEnabled.Create( "Enable", CWnd::WsVisible, &m_proEnabled, this );
 		m_itmSource.Create( "Source", CWnd::WsVisible, &m_proSource, this );

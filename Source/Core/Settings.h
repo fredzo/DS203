@@ -237,15 +237,31 @@ public:
 	public:
 		static const char* const ppszTextEnabled[];
 		static const char* const ppszTextSource[];
-		static const char* const ppszTextType[];
-		static const char* const ppszTextSuffix[];
+		static const char* const ppszTextTypeVac[];
+		static const char* const ppszTextTypeVdc[];
+		static const char* const ppszTextTypeCont[];
+		static const char* const ppszTextTypeOhm[];
+		static const char* const ppszTextTypeAac[];
+		static const char* const ppszTextTypeAdc[];
+		static const char* const ppszTextSuffixVac[];
+		static const char* const ppszTextSuffixVdc[];
+		static const char* const ppszTextSuffixCont[];
+		static const char* const ppszTextSuffixOhm[];
+		static const char* const ppszTextSuffixAac[];
+		static const char* const ppszTextSuffixAdc[];
 
 		enum { _Off, _On, _MaxEnabled = _On }
 			Enabled;
 		enum ESource { _CH1, _CH2, _MaxSource = _CH2 }
 			Source; 
-		enum { _Min, _Max, _Avg, _Rms, _RectAvg, _Vpp, _Freq, _Period, _FormFactor, _Sigma, _Dispersion, _MaxType = _Dispersion }
-			Type;
+		enum VacType  { _VacMin, _VacMax, _VacAvg, _VacRms, _VacRectAvg, _VacVpp, _VacFreq, _VacPeriod, _VacFormFactor, _VacSigma, _VacDispersion, _VacMaxType = _VacDispersion };
+		enum VdcType  { _VdcMin, _VdcMax, _VdcAvg, _VdcRms, _VdcRectAvg, _VdcVpp, _VdcFreq, _VdcPeriod, _VdcFormFactor, _VdcSigma, _VdcDispersion, _VdcMaxType = _VdcDispersion };
+		enum ContType { _ContCont, _ContOhm, _ContMin, _ContMax, _ContMaxType = _ContMax };
+		enum OhmType  { _OhmOhm, _OhmMin, _OhmMax, _OhmMaxType = _OhmMax };
+		enum AacType  { _AacMin, _AacMax, _AacAvg, _AacRms, _AacRectAvg, _AacApp, _AacFreq, _AacPeriod, _AacMaxType = _AacPeriod };
+		enum AdcType  { _AdcMin, _AdcMax, _AdcAvg, _AdcRms, _AdcRectAvg, _AdcApp, _AdcFreq, _AdcPeriod, _AdcMaxType = _AdcPeriod };
+
+		NATIVEENUM Type;
 		
 		float fValue;
 
@@ -265,18 +281,32 @@ public:
 	public:
 		static const char* const ppszTextDmmMode[];
 		// = {"V-AC", "V-DC, "Cont."};
+		static const char* const ppszTextDmmRange[];
+		static const char* const ppszTextDmmTime[];
 
-		enum { _VAC, _VDC, _CONT, _ModeMax = _CONT }
+		enum EDmmMode { _VAC = 0, _VDC, _CONT, _OHM ,_mADC, _mAAC, _ModeMax = _mAAC }
 			Mode;
+
+		enum EDmmRange { _DmmRangeAuto, _DmmRange50mV, _DmmRange100mV, _DmmRange200mV, _DmmRange500mV, _DmmRange1V, _DmmRange2V, _DmmRange5V, _DmmRange10V, _DmmRangeMax = _DmmRange10V} 
+			Range;
+
+		enum EDmmTime { 
+			_DmmTimeAuto, _DmmTime200ns, _DmmTime500ns, 
+			_DmmTime1us, _DmmTime2us, _DmmTime5us,
+			_DmmTime10us, _DmmTime20us, _DmmTime50us, _DmmTime100us, _DmmTime200us, _DmmTime500us,
+			_DmmTime1ms, _DmmTime2ms, _DmmTime5ms,
+			_DmmTime10ms, _DmmTime20ms, _DmmTime50ms, _DmmTime100ms, _DmmTime200ms, _DmmTime500ms, 
+			_DmmTime1s, _DmmTimeMax = _DmmTime500ms }
+			Time;
 
 		virtual CSerialize& operator <<( CStream& stream )
 		{
-			stream << _E(Mode);
+			stream << _E(Mode) << _E(Range) << _E(Time);
 			return *this;
 		}
 		virtual CSerialize& operator >>( CStream& stream )
 		{
-			stream >> _E(Mode);
+			stream >> _E(Mode) >> _E(Range) >> _E(Time);
 			return *this;
 		}
 	};
@@ -471,7 +501,7 @@ public:
 	Marker		MarkY1;
 	Marker		MarkY2;
 	Measure		Meas[6];
-	DmmMeasure 	DmmMeas[3];
+	DmmMeasure 	DmmMeas[3][6];
 	DmmSettings	Dmm;
 
 	MathOperand MathA;
@@ -495,7 +525,12 @@ public:
 		stream << dwId << Runtime << CH1 << CH2 << CH3 << CH4 << Time << Trig << Gen
 			<< MarkT1 << MarkT2 << MarkY1 << MarkY2
 			<< Meas[0] << Meas[1] << Meas[2] << Meas[3] << Meas[4] << Meas[5]
-			<< DmmMeas[0] << DmmMeas[1] << DmmMeas[2]
+			<< DmmMeas[0][0] << DmmMeas[1][0] << DmmMeas[2][0]
+			<< DmmMeas[0][1] << DmmMeas[1][1] << DmmMeas[2][1]
+			<< DmmMeas[0][2] << DmmMeas[1][2] << DmmMeas[2][2]
+			<< DmmMeas[0][3] << DmmMeas[1][3] << DmmMeas[2][3]
+			<< DmmMeas[0][4] << DmmMeas[1][4] << DmmMeas[2][4]
+			<< DmmMeas[0][5] << DmmMeas[1][5] << DmmMeas[2][5]
 			<< MathA << MathB << MathC << Math
 			<< Spec
 			<< dwEnd;
@@ -514,7 +549,12 @@ public:
 			stream >> Runtime >> CH1 >> CH2 >> CH3 >> CH4 >> Time >> Trig >> Gen
 				>> MarkT1 >> MarkT2 >> MarkY1 >> MarkY2
 				>> Meas[0] >> Meas[1] >> Meas[2] >> Meas[3] >> Meas[4] >> Meas[5]
-				>> DmmMeas[0] >> DmmMeas[1] >> DmmMeas[2] 
+				>> DmmMeas[0][0] >> DmmMeas[1][0] >> DmmMeas[2][0] 
+				>> DmmMeas[0][1] >> DmmMeas[1][1] >> DmmMeas[2][1]
+				>> DmmMeas[0][2] >> DmmMeas[1][2] >> DmmMeas[2][2]
+				>> DmmMeas[0][3] >> DmmMeas[1][3] >> DmmMeas[2][3]
+				>> DmmMeas[0][4] >> DmmMeas[1][4] >> DmmMeas[2][4]
+				>> DmmMeas[0][5] >> DmmMeas[1][5] >> DmmMeas[2][5]
 				>> MathA >> MathB >> MathC >> Math
 				>> Spec
 				>> dwEnd;
@@ -540,5 +580,9 @@ public:
 	void ResetCalibration();
 	void SaveCalibration();
 	bool LoadCalibration();
+
+	static const char* const* getTypeText(CSettings::DmmSettings::EDmmMode mode);
+	static const char* const* getTypeSuffix(CSettings::DmmSettings::EDmmMode mode);
+	static NATIVEENUM getTypeMaxEnum(CSettings::DmmSettings::EDmmMode mode);
 };
 #endif
