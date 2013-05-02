@@ -217,8 +217,15 @@ void CWndDmm::OnPaint(bool updateBg)
 		{
 			if(i%5 == 0)
 			{
-				BIOS::LCD::Bar( x-1, y-4, x+1, y,  CWndDmm::cOn );
-				int labelValue = i*fullScale;
+				if(i%10 == 0)
+				{
+                    BIOS::LCD::Bar( x-1, y-4, x+1, y+2,  CWndDmm::cOn );
+				}
+				else
+				{
+					BIOS::LCD::Bar( x-1, y-4, x+1, y,  CWndDmm::cOn );
+				}
+				int labelValue = i*fullScale/100;
 				int xPos;
 				if(labelValue < 10) 
 				{
@@ -301,19 +308,19 @@ void CWndDmm::computeFullRange(CSettings::DmmMeasure *pDmmMeas, float* pFullRang
 	{
 		case CSettings::AnalogChannel::_50mV :
 			(*pFullRange) = 0.2f;
-			(*pFullScale) = 2;
+			(*pFullScale) = 200; // mV
 			break;
 		case CSettings::AnalogChannel::_100mV :
 			(*pFullRange) = 0.4f;
-			(*pFullScale) = 4;
+			(*pFullScale) = 400; // mV
 			break;
 		case CSettings::AnalogChannel::_200mV :
 			(*pFullRange) = 0.8f;
-			(*pFullScale) = 8;
+			(*pFullScale) = 800; // mV
 			break;
 		case CSettings::AnalogChannel::_500mV :
 			(*pFullRange) = 2;
-			(*pFullScale) = 2;
+			(*pFullScale) = 20;  // 2 does not devide by 4 in integer !...
 			break;
 		case CSettings::AnalogChannel::_1V :
 			(*pFullRange) = 4;
@@ -325,12 +332,12 @@ void CWndDmm::computeFullRange(CSettings::DmmMeasure *pDmmMeas, float* pFullRang
 			break;
 		case CSettings::AnalogChannel::_5V :
 			(*pFullRange) = 20;
-			(*pFullScale) = 2;
+			(*pFullScale) = 20;
 			break;
 		default:
 		case CSettings::AnalogChannel::_10V :
 			(*pFullRange) = 40;
-			(*pFullScale) = 4;
+			(*pFullScale) = 40;
 			break;
 	}
 }

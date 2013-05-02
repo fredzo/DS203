@@ -1,12 +1,12 @@
 #include "Application.h"
 #include <Source/Gui/MainWnd.h>
-
+/*
 CApplicationProto::CApplicationProto() {}
 CApplicationProto::~CApplicationProto() {}
 void CApplicationProto::Create() {}
 void CApplicationProto::Destroy() {}
 bool CApplicationProto::operator ()() { return false; }
-
+*/
 
 /*static*/ CApplication* CApplication::m_pInstance = NULL;
 
